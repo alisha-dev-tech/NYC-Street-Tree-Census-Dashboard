@@ -156,7 +156,7 @@ st.markdown("""
 @st.cache_data
 def load_data():
     """Load and preprocess the 2015 Street Tree Census dataset"""
-    df = pd.read_csv('data/trees.csv')
+    df = pd.read_csv('trees.csv')
     df['created_at'] = pd.to_datetime(df['created_at'], format='%m/%d/%Y', errors='coerce')
     return df
 
