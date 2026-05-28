@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-from datetime import datetime
 
 # ---------------- SAGA GREEN THEME ----------------
 st.set_page_config(
@@ -13,9 +12,7 @@ st.set_page_config(
     page_icon="🌳"
 )
 
-# Saga Green color palette
 SAGA_GREEN = "#2a9d8f"
-SAGA_DARK = "#264653"
 SAGA_LIGHT = "#34c759"
 BG_DARK = "#1a1a1a"
 BG_LIGHT = "#2a2a2a"
@@ -26,7 +23,6 @@ body {{background-color: {BG_DARK}; color: #ffffff;}}
 .block-container {{padding: 1rem;}}
 .stMarkdown {{color: #ffffff;}}
 [data-testid="stSidebar"] {{background-color: {BG_LIGHT};}}
-.css-1kyx43y {{background-color: {BG_LIGHT};}}
 .stButton>button {{background-color: {SAGA_GREEN}; color: white; border: none;}}
 .stButton>button:hover {{background-color: {SAGA_LIGHT};}}
 h1, h2, h3 {{color: {SAGA_GREEN};}}
@@ -36,7 +32,22 @@ h1, h2, h3 {{color: {SAGA_GREEN};}}
 # ---------------- LOAD DATA ----------------
 @st.cache_data
 def load_data():
-    df = pd.read_csv("data/trees.csv", low_memory=False)
+    try:
+        df = pd.read_csv("data/trees.csv", low_memory=False)
+    except FileNotFoundError:
+        st.error("❌ CSV file not found! Make sure 'data/trees.csv' is uploaded to your GitHub repo.")
+        st.stop()
+    
+    # Show actual columns for debugging
+    st.sidebar.write("**CSV Columns:**", list(df.columns)[:10])
+    
+    # Auto-detect borough column name
+    if 'boro_name' in df.columns:
+        df = df.rename(columns={'boro_name': 'boroname'})
+    elif 'boroname' not in df.columns:
+        st.error(f"❌ No borough column found! Available columns: {list(df.columns)}")
+        st.stop()
+    
     df['tree_dbh'] = pd.to_numeric(df['tree_dbh'], errors='coerce')
     df['spc_common'] = df['spc_common'].fillna('Unknown')
     df['boroname'] = df['boroname'].fillna('Unknown')
@@ -48,7 +59,10 @@ def load_data():
 df = load_data()
 
 st.title("🌳 NYC Street Trees Dashboard")
-st.markdown("""**Explore the NYC Tree Census dataset.** Analyze tree species, health, size, borough distribution, and more. Use sidebar filters to narrow down data.**""")
+st.markdown("**Explore the NYC Tree Census dataset.** Use sidebar filters to narrow down data.")
+
+# باقی کا سارا کوڈ ویسا ہی رہے گا جیسا میں نے پچھلی بار دیا تھا...
+# ... آپ کا پورا 10 charts والا کوڈ یہاں paste کر دیں ...
 
 # ---------------- SIDEBAR FILTERS ----------------
 st.sidebar.header("🔍 Filters")
