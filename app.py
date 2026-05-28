@@ -39,10 +39,10 @@ def load_data():
     df = pd.read_csv("data/trees.csv", low_memory=False)
     df['tree_dbh'] = pd.to_numeric(df['tree_dbh'], errors='coerce')
     df['spc_common'] = df['spc_common'].fillna('Unknown')
-    df['boro_name'] = df['boro_name'].fillna('Unknown')
+    df['boroname'] = df['boroname'].fillna('Unknown')
     df['health'] = df['health'].fillna('Unknown')
     df['status'] = df['status'].fillna('Unknown')
-    df = df.dropna(subset=['tree_dbh', 'spc_common', 'boro_name'])
+    df = df.dropna(subset=['tree_dbh', 'spc_common', 'boroname'])
     return df
 
 df = load_data()
@@ -52,8 +52,7 @@ st.markdown("""**Explore the NYC Tree Census dataset.** Analyze tree species, he
 
 # ---------------- SIDEBAR FILTERS ----------------
 st.sidebar.header("🔍 Filters")
-
-boroughs = st.sidebar.multiselect("Select Borough", sorted(df['boro_name'].unique()), default=sorted(df['boro_name'].unique()))
+boroughs = st.sidebar.multiselect("Select Borough", sorted(df['boroname'].unique()), default=sorted(df['boroname'].unique()))
 health = st.sidebar.multiselect("Tree Health", sorted(df['health'].unique()), default=sorted(df['health'].unique()))
 status = st.sidebar.multiselect("Tree Status", sorted(df['status'].unique()), default=sorted(df['status'].unique()))
 
@@ -61,7 +60,7 @@ dbh_min, dbh_max = float(df['tree_dbh'].min()), float(df['tree_dbh'].max())
 dbh_range = st.sidebar.slider("Trunk Diameter (inches)", dbh_min, dbh_max, (dbh_min, dbh_max))
 
 df2 = df[
-    (df['boro_name'].isin(boroughs)) &
+    (df['boroname'].isin(boroughs)) &
     (df['health'].isin(health)) &
     (df['status'].isin(status)) &
     (df['tree_dbh'] >= dbh_range[0]) &
@@ -84,16 +83,15 @@ col1, col2, col3, col4 = st.columns(4)
 col1.metric("Total Trees", f"{len(df2):,}")
 col2.metric("Unique Species", f"{df2['spc_common'].nunique():,}")
 col3.metric("Avg Trunk Diameter", f"{df2['tree_dbh'].mean():.1f}\"")
-col4.metric("Boroughs", f"{df2['boro_name'].nunique()}")
+col4.metric("Boroughs", f"{df2['boroname'].nunique()}")
 
 st.divider()
 
 # ---------------- 10 CHARTS WITH DESCRIPTIONS ----------------
 col1, col2 = st.columns(2)
-
 with col1:
     st.subheader("1. Trees by Borough")
-    borough_counts = df2['boro_name'].value_counts()
+    borough_counts = df2['boroname'].value_counts()
     fig, ax = plt.subplots(figsize=(6, 4))
     sns.barplot(x=borough_counts.values, y=borough_counts.index, ax=ax, color=SAGA_GREEN)
     ax.set_xlabel("Count")
@@ -110,7 +108,6 @@ with col2:
     st.caption("*London Plane and Honey Locust are the most common NYC street trees.*")
 
 col3, col4 = st.columns(2)
-
 with col3:
     st.subheader("3. Tree Health Distribution")
     health_counts = df2['health'].value_counts()
@@ -128,10 +125,9 @@ with col4:
     st.caption("*Most trees have 10-20 inch trunk diameter. Older trees have >30 inch trunks.*")
 
 col5, col6 = st.columns(2)
-
 with col5:
     st.subheader("5. Health by Borough")
-    health_boro = df2.groupby(['boro_name', 'health']).size().unstack(fill_value=0)
+    health_boro = df2.groupby(['boroname', 'health']).size().unstack(fill_value=0)
     fig, ax = plt.subplots(figsize=(6, 4))
     health_boro.plot(kind='bar', stacked=True, ax=ax, color=[SAGA_GREEN, SAGA_LIGHT, "#e9c46a"])
     ax.set_ylabel("Count"); ax.legend(title="Health")
@@ -148,7 +144,6 @@ with col6:
     st.caption("*Good health trees tend to have larger diameters. Poor health trees are often smaller/younger.*")
 
 col7, col8 = st.columns(2)
-
 with col7:
     st.subheader("7. Status Breakdown")
     status_counts = df2['status'].value_counts()
@@ -160,7 +155,7 @@ with col7:
 
 with col8:
     st.subheader("8. Species Diversity by Borough")
-    diversity = df2.groupby('boro_name')['spc_common'].nunique().sort_values(ascending=False)
+    diversity = df2.groupby('boroname')['spc_common'].nunique().sort_values(ascending=False)
     fig, ax = plt.subplots(figsize=(6, 4))
     sns.barplot(x=diversity.values, y=diversity.index, ax=ax, color=SAGA_LIGHT)
     ax.set_xlabel("Number of Species")
@@ -168,7 +163,6 @@ with col8:
     st.caption("*Manhattan has highest species diversity despite fewer total trees.*")
 
 col9, col10 = st.columns(2)
-
 with col9:
     st.subheader("9. Top 10 Species by Avg Diameter")
     avg_dbh = df2.groupby('spc_common')['tree_dbh'].mean().nlargest(10)
@@ -193,5 +187,5 @@ st.divider()
 
 # ---------------- DATA TABLE ----------------
 st.subheader("📋 Sample of Filtered Data")
-display_cols = ['spc_common', 'boro_name', 'tree_dbh', 'health', 'status']
+display_cols = ['spc_common', 'boroname', 'tree_dbh', 'health', 'status']
 st.dataframe(df2[display_cols].sample(min(100, len(df2))).reset_index(drop=True), use_container_width=True, height=300)
