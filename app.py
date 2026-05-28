@@ -41,9 +41,11 @@ def load_data():
     # Show actual columns for debugging
     st.sidebar.write("**CSV Columns:**", list(df.columns)[:10])
     
-    # Auto-detect borough column name
+    # اب borough, boro_name, boroname تینوں handle ہوں گے
     if 'boro_name' in df.columns:
         df = df.rename(columns={'boro_name': 'boroname'})
+    elif 'borough' in df.columns:
+        df = df.rename(columns={'borough': 'boroname'})
     elif 'boroname' not in df.columns:
         st.error(f"❌ No borough column found! Available columns: {list(df.columns)}")
         st.stop()
@@ -55,7 +57,6 @@ def load_data():
     df['status'] = df['status'].fillna('Unknown')
     df = df.dropna(subset=['tree_dbh', 'spc_common', 'boroname'])
     return df
-
 df = load_data()
 
 st.title("🌳 NYC Street Trees Dashboard")
