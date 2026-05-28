@@ -29,24 +29,16 @@ st.markdown("""
 
 @st.cache_data
 def load_data():
-    try:
-        url = "https://drive.google.com/uc?export=download&id=1OkstsN_r1glXGIAbPW1LkZ2L7SnB6u6A"
-        df = pd.read_csv(url, on_bad_lines='skip', engine='python')
-    except Exception as e:
-        st.error(f"CSV load nahi ho rahi: {e}")
-        st.stop()
+    df = pd.read_csv('2015_Street_Tree_Census_-_Tree_Data.csv', on_bad_lines='skip', engine='python')
     
-    # Date column handle karo
+    # Date column handle
     if 'Created_Date' in df.columns:
         df['created_at'] = pd.to_datetime(df['Created_Date'], errors='coerce')
     elif 'created_date' in df.columns:
         df['created_at'] = pd.to_datetime(df['created_date'], errors='coerce')
-    elif 'created_at' in df.columns:
-        df['created_at'] = pd.to_datetime(df['created_at'], errors='coerce')
     else:
-        st.error(f"Date column nahi mili. Available columns: {list(df.columns)}")
+        st.error(f"Date column nahi mili. Columns: {list(df.columns)}")
         st.stop()
-    
     return df
 
 # Load data
