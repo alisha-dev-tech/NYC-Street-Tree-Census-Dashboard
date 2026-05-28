@@ -1,9 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
-import requests
-import io
 import folium
 from streamlit_folium import folium_static
 
@@ -16,14 +13,13 @@ st.set_page_config(
 # Custom CSS
 st.markdown("""
 <style>
-    .main {background-color: #f8f9fa;}
-    .stSidebar {background-color: #e8f5e9;}
-    h1 {color: #2e7d32; font-weight: bold;}
-    h2, h3 {color: #388e3c;}
-    .stMetric {background-color: #ffffff; padding: 15px; border-radius: 10px; 
-               box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
-    .stButton>button {background-color: #4caf50; color: white; border-radius: 5px;}
-    .stButton>button:hover {background-color: #45a049;}
+.main {background-color: #f8f9fa;}
+.stSidebar {background-color: #e8f5e9;}
+h1 {color: #2e7d32; font-weight: bold;}
+h2, h3 {color: #388e3c;}
+.stMetric {background-color: #ffffff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+.stButton>button {background-color: #4caf50; color: white; border-radius: 5px;}
+.stButton>button:hover {background-color: #45a049;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -31,28 +27,28 @@ st.markdown("""
 def load_data():
     df = pd.read_csv('2015_Street_Tree_Census_-_Tree_Data.csv', on_bad_lines='skip', engine='python')
     
-    # Saare column names ko clean kardo: space -> underscore, lower case
+    # سارے کالم کے نام صاف کر دو: space کو underscore میں اور lowercase
     df.columns = df.columns.str.strip().str.replace(' ', '_').str.lower()
-
-    # Date column handle - ab sab lower case ho gaye
+    
+    # اگر created_date کالم ہے تو datetime میں کنورٹ کرو، ورنہ خالی رکھو
     if 'created_date' in df.columns:
         df['created_at'] = pd.to_datetime(df['created_date'], errors='coerce')
     else:
-        st.error(f"Date column nahi mili. Columns: {list(df.columns)}")
-        st.stop()
+        df['created_at'] = pd.NaT
+    
     return df
 
-# Load data
+# ڈیٹا لوڈ کرو
 with st.spinner('Data load ho raha hai...'):
     df = load_data()
 
-# Sidebar filters
+# Sidebar Filters
 st.sidebar.title("Filters")
-boroughs = st.sidebar.multiselect("Borough Select Karo", options=df['borough'].unique(), default=df['borough'].unique())
+boroughs = st.sidebar.multiselect("Borough Select Karo", options=df['borough'].dropna().unique(), default=df['borough'].dropna().unique())
 health_options = st.sidebar.multiselect("Tree Health", options=df['health'].dropna().unique(), default=df['health'].dropna().unique())
 species_list = st.sidebar.multiselect("Species", options=df['spc_common'].dropna().unique()[:20], default=df['spc_common'].dropna().unique()[:10])
 
-# Apply filters
+# Filters Apply کرو
 filtered_df = df[
     (df['borough'].isin(boroughs)) & 
     (df['health'].isin(health_options)) & 
@@ -61,7 +57,7 @@ filtered_df = df[
 
 # Title
 st.title("NYC Street Tree Census Dashboard")
-st.markdown("New York City ke street trees ka interactive analysis")
+st.markdown("New York City کے street trees کا interactive analysis")
 
 # Metrics
 col1, col2, col3, col4 = st.columns(4)
@@ -72,54 +68,55 @@ with col2:
 with col3:
     st.metric("Boroughs", filtered_df['borough'].nunique())
 with col4:
-    healthy_pct = (filtered_df['health'] == 'Good').mean() * 100
+    healthy_pct = (filtered_df['health'] == 'Good').mean() * 100 if len(filtered_df) > 0 else 0
     st.metric("Healthy Trees %", f"{healthy_pct:.1f}%")
 
 # Charts
 st.subheader("Species Distribution")
 species_count = filtered_df['spc_common'].value_counts().head(10)
-fig_species = px.bar(
-    species_count,
-    x=species_count.values,
-    y=species_count.index,
-    orientation='h',
-    labels={'x': 'Tree Count', 'y': 'Species'},
-    color=species_count.values,
-    color_continuous_scale='Greens'
-)
-fig_species.update_layout(height=400)
-st.plotly_chart(fig_species, use_container_width=True)
+if len(species_count) > 0:
+    fig_species = px.bar(
+        species_count,
+        x=species_count.values,
+        y=species_count.index,
+        orientation='h',
+        labels={'x': 'Tree Count', 'y': 'Species'},
+        color=species_count.values,
+        color_continuous_scale='Greens'
+    )
+    fig_species.update_layout(height=400, showlegend=False)
+    st.plotly_chart(fig_species, use_container_width=True)
 
 col1, col2 = st.columns(2)
-
 with col1:
     st.subheader("Health Status")
     health_count = filtered_df['health'].value_counts()
-    fig_health = px.pie(
-        values=health_count.values,
-        names=health_count.index,
-        color_discrete_sequence=px.colors.sequential.Greens
-    )
-    st.plotly_chart(fig_health, use_container_width=True)
+    if len(health_count) > 0:
+        fig_health = px.pie(
+            values=health_count.values,
+            names=health_count.index,
+            color_discrete_sequence=px.colors.sequential.Greens
+        )
+        st.plotly_chart(fig_health, use_container_width=True)
 
 with col2:
     st.subheader("Trees by Borough")
     borough_count = filtered_df['borough'].value_counts()
-    fig_borough = px.bar(
-        x=borough_count.index,
-        y=borough_count.values,
-        labels={'x': 'Borough', 'y': 'Tree Count'},
-        color=borough_count.values,
-        color_continuous_scale='Greens'
-    )
-    st.plotly_chart(fig_borough, use_container_width=True)
+    if len(borough_count) > 0:
+        fig_borough = px.bar(
+            x=borough_count.index,
+            y=borough_count.values,
+            labels={'x': 'Borough', 'y': 'Tree Count'},
+            color=borough_count.values,
+            color_continuous_scale='Greens'
+        )
+        st.plotly_chart(fig_borough, use_container_width=True)
 
 # Map
 st.subheader("Tree Locations Map")
 if len(filtered_df) > 0:
     sample_df = filtered_df.sample(min(1000, len(filtered_df)))
     m = folium.Map(location=[40.7128, -74.0060], zoom_start=11)
-    
     for idx, row in sample_df.iterrows():
         if pd.notna(row['x_sp']) and pd.notna(row['y_sp']):
             folium.CircleMarker(
@@ -129,10 +126,11 @@ if len(filtered_df) > 0:
                 color='green',
                 fill=True
             ).add_to(m)
-    
     folium_static(m, width=700, height=500)
+else:
+    st.warning("No data to display on map")
 
-# Data table
+# Data Table
 st.subheader("Sample Data")
 st.dataframe(filtered_df[['spc_common', 'borough', 'health', 'created_at']].head(100))
 
