@@ -70,20 +70,20 @@ def create_kpi_cards(df):
     pass
 
 def create_all_charts(df):
-    pie = px.pie(df, names='borough', title='Trees by Borough', hole=0.4)
-    hist = px.histogram(df, x='tree_dbh', nbins=30, title='Tree Diameter Distribution')
+    pie = px.pie(df, names='borough', title='🌆 Trees by Borough', hole=0.4)
+    hist = px.histogram(df, x='tree_dbh', nbins=30, title='📏 Tree Diameter Distribution')
     df_sorted = df.sort_values('created_at')
     df_sorted['cumsum'] = range(1, len(df_sorted) + 1)
-    line = px.line(df_sorted, x='created_at', y='cumsum', title='Cumulative Trees Over Time')
+    line = px.line(df_sorted, x='created_at', y='cumsum', title='📆 Cumulative Trees Over Time')
     top_species = df['spc_common'].value_counts().head(10)
-    bar = px.bar(x=top_species.values, y=top_species.index, orientation='h', title='Top 10 Species')
-    scatter = px.scatter(df, x='tree_dbh', y='health', title='DBH vs Health', opacity=0.3)
-    box = px.box(df, x='borough', y='tree_dbh', title='DBH Distribution by Borough')
-    heatmap = px.imshow(df[['tree_dbh']].corr(), title='Correlation Heatmap')
+    bar = px.bar(x=top_species.values, y=top_species.index, orientation='h', title='🌱 Top 10 Tree Species')
+    scatter = px.scatter(df, x='tree_dbh', y='health', title='💡 DBH vs Health', opacity=0.3)
+    box = px.box(df, x='borough', y='tree_dbh', title='📊 DBH Distribution by Borough')
+    heatmap = px.imshow(df[['tree_dbh']].corr(), title='🔥 Correlation Heatmap')
     area_data = df.groupby([df['created_at'].dt.date, 'health']).size().reset_index(name='count')
-    area = px.area(area_data, x='created_at', y='count', color='health', title='Health Status Over Time')
-    count = px.histogram(df, x='health', title='Tree Health Count')
-    violin = px.violin(df, x='health', y='tree_dbh', title='DBH Distribution by Health')
+    area = px.area(area_data, x='created_at', y='count', color='health', title='📈 Health Status Over Time')
+    count = px.histogram(df, x='health', title='💚 Tree Health Count')
+    violin = px.violin(df, x='health', y='tree_dbh', title='🎻 DBH Distribution by Health')
     return {'pie': pie, 'histogram': hist, 'line': line, 'bar': bar, 'scatter': scatter,
             'box': box, 'heatmap': heatmap, 'area': area, 'count': count, 'violin': violin}
 
@@ -184,38 +184,48 @@ st.markdown("---")
 # Generate charts
 charts = create_all_charts(filtered_df)
 
-# Chart Grid - NO DOWNLOAD BUTTONS TO AVOID KALEIDO ERROR
+# Chart Grid with Descriptions
 st.markdown("## 📊 Interactive Visualizations")
 
 col1, col2 = st.columns(2)
 with col1:
     st.plotly_chart(charts['pie'], use_container_width=True, key="pie_chart")
+    st.markdown("*Shows the distribution of trees across NYC's 5 boroughs. Helps identify which areas have highest tree density.*")
 with col2:
     st.plotly_chart(charts['histogram'], use_container_width=True, key="hist_chart")
+    st.markdown("*Distribution of tree diameter at breast height. Most NYC street trees are under 30 inches in diameter.*")
 
 col3, col4 = st.columns(2)
 with col3:
     st.plotly_chart(charts['line'], use_container_width=True, key="line_chart")
+    st.markdown("*Cumulative count of trees over time. Shows planting trends and census progress during data collection.*")
 with col4:
     st.plotly_chart(charts['bar'], use_container_width=True, key="bar_chart")
+    st.markdown("*Top 10 most common tree species in NYC. London Plane and Honey Locust dominate the urban canopy.*")
 
 col5, col6 = st.columns(2)
 with col5:
     st.plotly_chart(charts['scatter'], use_container_width=True, key="scatter_chart")
+    st.markdown("*Relationship between tree diameter and health. Larger trees tend to have better health ratings.*")
 with col6:
     st.plotly_chart(charts['box'], use_container_width=True, key="box_chart")
+    st.markdown("*DBH distribution by borough. Compares tree size variation across different NYC areas.*")
 
 col7, col8 = st.columns(2)
 with col7:
     st.plotly_chart(charts['heatmap'], use_container_width=True, key="heatmap_chart")
+    st.markdown("*Correlation between numeric variables. Currently shows DBH correlation - add more numeric fields to expand.*")
 with col8:
     st.plotly_chart(charts['area'], use_container_width=True, key="area_chart")
+    st.markdown("*Tree health status over time. Tracks how Good/Fair/Poor health ratios change during census period.*")
 
 col9, col10 = st.columns(2)
 with col9:
     st.plotly_chart(charts['count'], use_container_width=True, key="count_chart")
+    st.markdown("*Count of trees by health status. Majority of NYC street trees are rated as 'Good' health.*")
 with col10:
     st.plotly_chart(charts['violin'], use_container_width=True, key="violin_chart")
+    st.markdown("*DBH distribution by health category. Shows size patterns for Good, Fair, and Poor health trees.*")
 
 st.markdown("---")
 st.markdown("### 📋 Raw Data Preview")
