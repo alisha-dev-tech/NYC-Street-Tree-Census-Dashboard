@@ -31,10 +31,11 @@ st.markdown("""
 def load_data():
     df = pd.read_csv('2015_Street_Tree_Census_-_Tree_Data.csv', on_bad_lines='skip', engine='python')
     
-    # Date column handle
-    if 'Created_Date' in df.columns:
-        df['created_at'] = pd.to_datetime(df['Created_Date'], errors='coerce')
-    elif 'created_date' in df.columns:
+    # Saare column names ko clean kardo: space -> underscore, lower case
+    df.columns = df.columns.str.strip().str.replace(' ', '_').str.lower()
+
+    # Date column handle - ab sab lower case ho gaye
+    if 'created_date' in df.columns:
         df['created_at'] = pd.to_datetime(df['created_date'], errors='coerce')
     else:
         st.error(f"Date column nahi mili. Columns: {list(df.columns)}")
