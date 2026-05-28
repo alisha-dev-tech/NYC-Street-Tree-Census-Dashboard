@@ -4,7 +4,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
-# ---------------- SAGA GREEN + BROWN THEME ----------------
+# =========================================================
+# PAGE CONFIG
+# =========================================================
 st.set_page_config(
     page_title="NYC Trees Dashboard",
     layout="wide",
@@ -12,241 +14,432 @@ st.set_page_config(
     page_icon="🌳"
 )
 
-SAGA_GREEN   = "#2a9d8f"
-SAGA_GREEN2  = "#21867a"
-BROWN_DARK   = "#4a3728"
-BROWN_MID    = "#6b4f3a"
-BROWN_LIGHT  = "#8b6f5e"
-CREAM        = "#f5f0eb"
-BG_DARK      = "#1c1410"      # very dark brown-black background
-BG_SIDEBAR   = "#2a1f18"      # dark brown sidebar
-BG_CARD      = "#3a2a20"      # card background
-TEXT_MAIN    = "#f0e6d3"      # warm cream text
-TEXT_DIM     = "#c4a882"      # dimmed warm text
-ACCENT       = "#e8b86d"      # golden brown accent
+# =========================================================
+# CINEMATIC SAGA GREEN + LUXURY BROWN THEME
+# =========================================================
+SAGA_GREEN      = "#2EC4B6"
+SAGA_GREEN_DARK = "#1B9AAA"
+SAGA_GLOW       = "#52F7D4"
 
+ESPRESSO        = "#1A120B"
+DARK_BROWN      = "#2C1810"
+CARD_BROWN      = "#3B241A"
+SOFT_BROWN      = "#5C4033"
+
+GOLD            = "#FFB703"
+GOLD_LIGHT      = "#FFD166"
+
+CREAM           = "#FFF8E7"
+TEXT_MAIN       = "#F8F5F0"
+TEXT_DIM        = "#D6C2A8"
+
+BG_MAIN         = "#120B08"
+BG_CARD         = "#241712"
+BG_SIDEBAR      = "#1B110D"
+
+BORDER          = "#5B3A29"
+
+# =========================================================
+# GLOBAL CSS
+# =========================================================
 st.markdown(f"""
 <style>
-/* ---- Global ---- */
+
+/* ===================================================== */
+/* GLOBAL */
+/* ===================================================== */
 html, body, [data-testid="stAppViewContainer"] {{
-    background-color: {BG_DARK};
+    background:
+        radial-gradient(circle at top left, #2b1d16 0%, {BG_MAIN} 45%);
     color: {TEXT_MAIN};
-    font-family: 'Georgia', serif;
+    font-family: 'Inter', sans-serif;
 }}
 
-/* ---- Main block ---- */
+/* Main container */
 .block-container {{
-    padding: 1.5rem 2rem;
-    background-color: {BG_DARK};
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+    max-width: 1500px;
 }}
 
-/* ---- Sidebar ---- */
+/* ===================================================== */
+/* SIDEBAR */
+/* ===================================================== */
 [data-testid="stSidebar"] {{
-    background-color: {BG_SIDEBAR} !important;
-    border-right: 2px solid {BROWN_MID};
+    background: linear-gradient(
+        180deg,
+        {BG_SIDEBAR} 0%,
+        #261812 100%
+    ) !important;
+
+    border-right: 2px solid {BORDER};
 }}
+
 [data-testid="stSidebar"] * {{
     color: {TEXT_MAIN} !important;
 }}
-[data-testid="stSidebar"] .stMarkdown p {{
-    color: {TEXT_DIM} !important;
-    font-size: 0.85rem;
-}}
+
 [data-testid="stSidebar"] h1,
 [data-testid="stSidebar"] h2,
 [data-testid="stSidebar"] h3 {{
     color: {SAGA_GREEN} !important;
+    font-weight: 700;
 }}
 
-/* ---- Sidebar header label ---- */
 [data-testid="stSidebar"] label {{
     color: {TEXT_MAIN} !important;
     font-weight: 600;
 }}
 
-/* ---- Multiselect tags — fix invisible text ---- */
-[data-testid="stMultiSelect"] span[data-baseweb="tag"] {{
-    background-color: {BROWN_MID} !important;
-    color: {CREAM} !important;
-    border: 1px solid {SAGA_GREEN} !important;
-    border-radius: 4px;
-}}
-[data-testid="stMultiSelect"] span[data-baseweb="tag"] span {{
-    color: {CREAM} !important;
-}}
-/* X button in tags */
-[data-testid="stMultiSelect"] span[data-baseweb="tag"] [role="presentation"] svg {{
-    fill: {CREAM} !important;
-}}
-
-/* ---- Multiselect dropdown input ---- */
-[data-testid="stMultiSelect"] div[data-baseweb="select"] > div {{
-    background-color: {BG_CARD} !important;
-    border: 1px solid {BROWN_MID} !important;
-    color: {TEXT_MAIN} !important;
-}}
-
-/* ---- Slider ---- */
-[data-testid="stSlider"] label {{
-    color: {TEXT_MAIN} !important;
-}}
-[data-testid="stSlider"] div[data-testid="stTickBar"] {{
+[data-testid="stSidebar"] .stMarkdown p {{
     color: {TEXT_DIM} !important;
 }}
-.stSlider > div > div > div > div {{
-    background-color: {SAGA_GREEN} !important;
+
+/* ===================================================== */
+/* TITLE */
+/* ===================================================== */
+h1 {{
+    color: {SAGA_GREEN} !important;
+    font-size: 3rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -1px;
+
+    text-shadow:
+        0 0 8px rgba(46,196,182,0.35),
+        0 0 22px rgba(46,196,182,0.15);
 }}
 
-/* ---- Headings ---- */
-h1 {{ color: {SAGA_GREEN} !important; font-size: 2.2rem; }}
-h2, h3 {{ color: {ACCENT} !important; }}
+h2, h3 {{
+    color: {GOLD_LIGHT} !important;
+    font-weight: 700 !important;
+}}
 
-/* ---- Metrics ---- */
+/* ===================================================== */
+/* INFO / ALERT BOX */
+/* ===================================================== */
+[data-testid="stAlert"] {{
+    background: linear-gradient(
+        135deg,
+        rgba(46,196,182,0.12),
+        rgba(255,183,3,0.08)
+    ) !important;
+
+    border: 1px solid rgba(46,196,182,0.4) !important;
+
+    border-radius: 16px;
+    backdrop-filter: blur(6px);
+
+    color: {TEXT_MAIN} !important;
+}}
+
+/* ===================================================== */
+/* METRIC CARDS */
+/* ===================================================== */
 [data-testid="metric-container"] {{
-    background-color: {BG_CARD};
-    border: 1px solid {BROWN_MID};
-    border-left: 4px solid {SAGA_GREEN};
-    border-radius: 8px;
-    padding: 0.8rem 1rem;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(59,36,26,0.95),
+            rgba(36,23,18,0.98)
+        );
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    border-left: 5px solid {SAGA_GREEN};
+
+    border-radius: 18px;
+
+    padding: 1.2rem;
+
+    box-shadow:
+        0 8px 24px rgba(0,0,0,0.35),
+        0 0 0 1px rgba(46,196,182,0.05);
+
+    transition: 0.3s ease;
 }}
+
+[data-testid="metric-container"]:hover {{
+    transform: translateY(-3px);
+    box-shadow:
+        0 12px 28px rgba(0,0,0,0.45),
+        0 0 18px rgba(46,196,182,0.18);
+}}
+
 [data-testid="metric-container"] label {{
     color: {TEXT_DIM} !important;
+    font-size: 0.9rem !important;
 }}
-[data-testid="metric-container"] [data-testid="stMetricValue"] {{
+
+[data-testid="stMetricValue"] {{
     color: {CREAM} !important;
-    font-size: 1.8rem;
+    font-size: 2rem !important;
+    font-weight: 800 !important;
 }}
 
-/* ---- Info / success / warning boxes ---- */
-[data-testid="stAlert"] {{
-    background-color: {BG_CARD} !important;
-    border: 1px solid {BROWN_MID} !important;
-    color: {TEXT_MAIN} !important;
-    border-radius: 6px;
-}}
-
-/* ---- Divider ---- */
-hr {{ border-color: {BROWN_MID}; }}
-
-/* ---- Buttons ---- */
+/* ===================================================== */
+/* BUTTONS */
+/* ===================================================== */
 .stButton > button {{
-    background-color: {SAGA_GREEN} !important;
-    color: {CREAM} !important;
-    border: none;
-    border-radius: 6px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
+    background: linear-gradient(
+        135deg,
+        {SAGA_GREEN},
+        {SAGA_GREEN_DARK}
+    ) !important;
+
+    color: white !important;
+
+    border: none !important;
+
+    border-radius: 12px !important;
+
+    font-weight: 700 !important;
+
+    padding: 0.6rem 1rem !important;
+
+    box-shadow:
+        0 4px 14px rgba(46,196,182,0.35);
+
+    transition: all 0.25s ease;
 }}
+
 .stButton > button:hover {{
-    background-color: {SAGA_GREEN2} !important;
-    color: #ffffff !important;
+    transform: scale(1.03);
+    box-shadow:
+        0 6px 18px rgba(46,196,182,0.5);
 }}
 
-/* ---- Dataframe ---- */
+/* ===================================================== */
+/* MULTISELECT */
+/* ===================================================== */
+[data-testid="stMultiSelect"] span[data-baseweb="tag"] {{
+    background: linear-gradient(
+        135deg,
+        {SAGA_GREEN_DARK},
+        {SAGA_GREEN}
+    ) !important;
+
+    color: white !important;
+
+    border-radius: 8px !important;
+
+    border: none !important;
+
+    font-weight: 600;
+}}
+
+[data-testid="stMultiSelect"] span[data-baseweb="tag"] span {{
+    color: white !important;
+}}
+
+/* ===================================================== */
+/* INPUTS */
+/* ===================================================== */
+div[data-baseweb="select"] > div {{
+    background-color: {BG_CARD} !important;
+
+    border: 1px solid {BORDER} !important;
+
+    border-radius: 10px !important;
+}}
+
+/* ===================================================== */
+/* SLIDER */
+/* ===================================================== */
+.stSlider > div > div > div > div {{
+    background: linear-gradient(
+        90deg,
+        {SAGA_GREEN},
+        {GOLD}
+    ) !important;
+}}
+
+/* ===================================================== */
+/* DATAFRAME */
+/* ===================================================== */
 [data-testid="stDataFrame"] {{
-    background-color: {BG_CARD};
-    border: 1px solid {BROWN_MID};
-    border-radius: 6px;
+    border-radius: 16px;
+    overflow: hidden;
+
+    border: 1px solid rgba(255,255,255,0.06);
+
+    box-shadow:
+        0 8px 22px rgba(0,0,0,0.3);
 }}
 
-/* ---- Caption ---- */
-.stCaption, [data-testid="stCaptionContainer"] p {{
+/* ===================================================== */
+/* CAPTION */
+/* ===================================================== */
+.stCaption {{
     color: {TEXT_DIM} !important;
     font-style: italic;
-    font-size: 0.82rem;
 }}
 
-/* ---- Sidebar subheader spacing ---- */
-[data-testid="stSidebar"] h3 {{
-    margin-top: 1rem;
-    font-size: 0.95rem;
-    border-bottom: 1px solid {BROWN_MID};
-    padding-bottom: 3px;
+/* ===================================================== */
+/* CHART CONTAINERS */
+/* ===================================================== */
+.element-container:has(canvas) {{
+    background: linear-gradient(
+        145deg,
+        rgba(59,36,26,0.85),
+        rgba(36,23,18,0.95)
+    );
+
+    padding: 1rem;
+    border-radius: 18px;
+
+    border: 1px solid rgba(255,255,255,0.06);
+
+    box-shadow:
+        0 8px 24px rgba(0,0,0,0.35);
+
+    margin-bottom: 1rem;
 }}
+
+/* Divider */
+hr {{
+    border-color: rgba(255,255,255,0.08);
+}}
+
 </style>
 """, unsafe_allow_html=True)
 
-# Set matplotlib to match theme
+# =========================================================
+# MATPLOTLIB THEME
+# =========================================================
 plt.rcParams.update({
-    'figure.facecolor': '#3a2a20',
-    'axes.facecolor':   '#3a2a20',
-    'axes.edgecolor':   '#6b4f3a',
-    'axes.labelcolor':  '#f0e6d3',
-    'xtick.color':      '#c4a882',
-    'ytick.color':      '#c4a882',
-    'text.color':       '#f0e6d3',
-    'grid.color':       '#4a3728',
-    'grid.alpha':       0.4,
+    'figure.facecolor': BG_CARD,
+    'axes.facecolor': BG_CARD,
+    'axes.edgecolor': BORDER,
+    'axes.labelcolor': TEXT_MAIN,
+    'xtick.color': TEXT_DIM,
+    'ytick.color': TEXT_DIM,
+    'text.color': TEXT_MAIN,
+    'grid.color': '#5c4033',
+    'grid.alpha': 0.25,
+    'axes.titleweight': 'bold',
+    'axes.titlecolor': GOLD_LIGHT,
 })
 
-# Color palettes for charts
-CHART_PALETTE = [SAGA_GREEN, ACCENT, BROWN_LIGHT, "#e07a5f", "#81b29a", "#f2cc8f", "#3d405b"]
+# =========================================================
+# CHART COLORS
+# =========================================================
+CHART_PALETTE = [
+    "#2EC4B6",
+    "#FFB703",
+    "#FB8500",
+    "#8ECAE6",
+    "#90BE6D",
+    "#FFD166",
+    "#E76F51"
+]
 
-# ---------------- LOAD DATA ----------------
+# =========================================================
+# LOAD DATA
+# =========================================================
 @st.cache_data
 def load_data():
     try:
         df = pd.read_csv("data/trees.csv", low_memory=False)
+
     except FileNotFoundError:
-        st.error("❌ CSV file not found! Make sure 'data/trees.csv' is in your GitHub repo.")
+        st.error("❌ trees.csv file not found in data folder")
         st.stop()
 
     if 'boro_name' in df.columns:
         df = df.rename(columns={'boro_name': 'boroname'})
+
     elif 'borough' in df.columns:
         df = df.rename(columns={'borough': 'boroname'})
+
     elif 'boroname' not in df.columns:
-        st.error(f"❌ No borough column found! Available: {list(df.columns)}")
+        st.error("❌ Borough column missing")
         st.stop()
 
-    df['tree_dbh']   = pd.to_numeric(df['tree_dbh'], errors='coerce')
+    df['tree_dbh'] = pd.to_numeric(df['tree_dbh'], errors='coerce')
+
     df['spc_common'] = df['spc_common'].fillna('Unknown')
-    df['boroname']   = df['boroname'].fillna('Unknown')
-    df['health']     = df['health'].fillna('Unknown')
-    df['status']     = df['status'].fillna('Unknown')
-    df = df.dropna(subset=['tree_dbh', 'spc_common', 'boroname'])
+    df['boroname'] = df['boroname'].fillna('Unknown')
+    df['health'] = df['health'].fillna('Unknown')
+    df['status'] = df['status'].fillna('Unknown')
+
+    df = df.dropna(subset=['tree_dbh'])
+
     return df
 
 df = load_data()
 
-# ---------------- HEADER ----------------
+# =========================================================
+# HEADER
+# =========================================================
 st.title("🌳 NYC Street Trees Dashboard")
-st.markdown(f"<p style='color:{TEXT_DIM}; font-size:1rem;'>Explore the NYC Tree Census dataset. Use sidebar filters to narrow down data.</p>", unsafe_allow_html=True)
 
-# ---------------- SIDEBAR FILTERS ----------------
+st.markdown(
+    f"""
+    <p style='color:{TEXT_DIM}; font-size:1.05rem;'>
+    Explore NYC Tree Census data with interactive filters and insights.
+    </p>
+    """,
+    unsafe_allow_html=True
+)
+
+# =========================================================
+# SIDEBAR FILTERS
+# =========================================================
 st.sidebar.header("🔍 Filters")
-st.sidebar.markdown(f"<p style='color:{TEXT_DIM}'>All filters apply to all charts simultaneously.</p>", unsafe_allow_html=True)
 
+st.sidebar.markdown(
+    f"<p style='color:{TEXT_DIM}'>All filters update every chart instantly.</p>",
+    unsafe_allow_html=True
+)
+
+# Borough filter
 st.sidebar.subheader("🏙️ Borough")
+
 boroughs = st.sidebar.multiselect(
     "Select Borough",
     sorted(df['boroname'].unique()),
     default=sorted(df['boroname'].unique())
 )
 
+# Health filter
 st.sidebar.subheader("🌿 Tree Health")
+
 health = st.sidebar.multiselect(
     "Tree Health",
     sorted(df['health'].unique()),
     default=sorted(df['health'].unique())
 )
 
+# Status filter
 st.sidebar.subheader("📋 Tree Status")
+
 status = st.sidebar.multiselect(
     "Tree Status",
     sorted(df['status'].unique()),
     default=sorted(df['status'].unique())
 )
 
-st.sidebar.subheader("📏 Trunk Diameter (inches)")
-dbh_min, dbh_max = float(df['tree_dbh'].min()), float(df['tree_dbh'].max())
-dbh_range = st.sidebar.slider("Diameter Range", dbh_min, dbh_max, (dbh_min, dbh_max))
+# Diameter filter
+st.sidebar.subheader("📏 Trunk Diameter")
+
+dbh_min = float(df['tree_dbh'].min())
+dbh_max = float(df['tree_dbh'].max())
+
+dbh_range = st.sidebar.slider(
+    "Diameter Range",
+    dbh_min,
+    dbh_max,
+    (dbh_min, dbh_max)
+)
 
 st.sidebar.divider()
+
 if st.sidebar.button("🔄 Reset Filters", use_container_width=True):
     st.rerun()
 
-# ---------------- APPLY FILTERS ----------------
+# =========================================================
+# APPLY FILTERS
+# =========================================================
 df2 = df[
     (df['boroname'].isin(boroughs)) &
     (df['health'].isin(health)) &
@@ -255,132 +448,261 @@ df2 = df[
     (df['tree_dbh'] <= dbh_range[1])
 ].copy()
 
-st.info(f"**Active Filters:** {len(df2):,} trees selected")
+st.info(f"🌳 Active Filters: {len(df2):,} trees selected")
 
 if df2.empty:
-    st.warning("⚠️ No trees match current filters. Adjust sidebar.")
+    st.warning("⚠️ No trees match current filters.")
     st.stop()
 
-# ---------------- KPIs ----------------
+# =========================================================
+# KPI SECTION
+# =========================================================
 st.subheader("📊 Key Metrics")
-col1, col2, col3, col4 = st.columns(4)
-col1.metric("Total Trees",        f"{len(df2):,}")
-col2.metric("Unique Species",     f"{df2['spc_common'].nunique():,}")
-col3.metric("Avg Trunk Diameter", f"{df2['tree_dbh'].mean():.1f}\"")
-col4.metric("Boroughs",           f"{df2['boroname'].nunique()}")
+
+c1, c2, c3, c4 = st.columns(4)
+
+c1.metric("Total Trees", f"{len(df2):,}")
+
+c2.metric(
+    "Unique Species",
+    f"{df2['spc_common'].nunique():,}"
+)
+
+c3.metric(
+    "Avg Trunk Diameter",
+    f"{df2['tree_dbh'].mean():.1f}\""
+)
+
+c4.metric(
+    "Boroughs",
+    f"{df2['boroname'].nunique()}"
+)
 
 st.divider()
 
-# ---------------- CHART HELPER ----------------
+# =========================================================
+# CHART HELPER
+# =========================================================
 def styled_fig(w=6, h=4):
     fig, ax = plt.subplots(figsize=(w, h))
-    fig.patch.set_facecolor('#3a2a20')
-    ax.set_facecolor('#3a2a20')
+
+    fig.patch.set_facecolor(BG_CARD)
+    ax.set_facecolor(BG_CARD)
+
     return fig, ax
 
-# ---------------- 10 CHARTS ----------------
+# =========================================================
+# CHARTS
+# =========================================================
+
+# ---------------------------------------------------------
+# 1 + 2
+# ---------------------------------------------------------
 col1, col2 = st.columns(2)
 
 with col1:
+
     st.subheader("1. Trees by Borough")
+
     borough_counts = df2['boroname'].value_counts()
+
     fig, ax = styled_fig()
-    sns.barplot(x=borough_counts.values, y=borough_counts.index, ax=ax, color=SAGA_GREEN)
+
+    sns.barplot(
+        x=borough_counts.values,
+        y=borough_counts.index,
+        ax=ax,
+        palette=CHART_PALETTE
+    )
+
     ax.set_xlabel("Count")
-    st.pyplot(fig); plt.close()
-    st.caption("*Queens and Brooklyn have the most street trees. Manhattan has fewer due to dense buildings.*")
+
+    st.pyplot(fig)
 
 with col2:
-    st.subheader("2. Top 10 Tree Species")
-    top_species = df2['spc_common'].value_counts().head(10)
-    fig, ax = styled_fig()
-    sns.barplot(x=top_species.values, y=top_species.index, ax=ax, color=ACCENT)
-    ax.set_xlabel("Count")
-    st.pyplot(fig); plt.close()
-    st.caption("*London Plane and Honey Locust are the most common NYC street trees.*")
 
+    st.subheader("2. Top 10 Tree Species")
+
+    top_species = df2['spc_common'].value_counts().head(10)
+
+    fig, ax = styled_fig()
+
+    sns.barplot(
+        x=top_species.values,
+        y=top_species.index,
+        ax=ax,
+        palette=CHART_PALETTE
+    )
+
+    ax.set_xlabel("Count")
+
+    st.pyplot(fig)
+
+# ---------------------------------------------------------
+# 3 + 4
+# ---------------------------------------------------------
 col3, col4 = st.columns(2)
 
 with col3:
+
     st.subheader("3. Tree Health Distribution")
+
     health_counts = df2['health'].value_counts()
+
     fig, ax = styled_fig()
+
     ax.pie(
         health_counts.values,
         labels=health_counts.index,
         autopct='%1.1f%%',
-        colors=[SAGA_GREEN, ACCENT, BROWN_LIGHT, "#e07a5f"],
+        colors=CHART_PALETTE,
         textprops={'color': TEXT_MAIN}
     )
-    st.pyplot(fig); plt.close()
-    st.caption("*Most trees are rated Good health. Dead trees are a small fraction.*")
+
+    st.pyplot(fig)
 
 with col4:
-    st.subheader("4. Trunk Diameter Distribution")
-    fig, ax = styled_fig()
-    sns.histplot(df2['tree_dbh'], bins=30, kde=True, ax=ax, color=SAGA_GREEN)
-    ax.set_xlabel("Diameter (inches)")
-    st.pyplot(fig); plt.close()
-    st.caption("*Most trees have 10–20 inch trunk diameter. Older trees have >30 inch trunks.*")
 
+    st.subheader("4. Trunk Diameter Distribution")
+
+    fig, ax = styled_fig()
+
+    sns.histplot(
+        df2['tree_dbh'],
+        bins=30,
+        kde=True,
+        ax=ax,
+        color=SAGA_GREEN
+    )
+
+    ax.set_xlabel("Diameter (inches)")
+
+    st.pyplot(fig)
+
+# ---------------------------------------------------------
+# 5 + 6
+# ---------------------------------------------------------
 col5, col6 = st.columns(2)
 
 with col5:
+
     st.subheader("5. Health by Borough")
-    health_boro = df2.groupby(['boroname', 'health']).size().unstack(fill_value=0)
+
+    health_boro = (
+        df2.groupby(['boroname', 'health'])
+        .size()
+        .unstack(fill_value=0)
+    )
+
     fig, ax = styled_fig()
-    health_boro.plot(kind='bar', stacked=True, ax=ax,
-                     color=[SAGA_GREEN, ACCENT, BROWN_LIGHT, "#e07a5f"])
-    ax.set_ylabel("Count")
-    ax.legend(title="Health", facecolor='#3a2a20', labelcolor=TEXT_MAIN)
+
+    health_boro.plot(
+        kind='bar',
+        stacked=True,
+        ax=ax,
+        color=CHART_PALETTE
+    )
+
     plt.xticks(rotation=45)
-    st.pyplot(fig); plt.close()
-    st.caption("*Health distribution varies by borough. Staten Island has highest % of Good trees.*")
+
+    st.pyplot(fig)
 
 with col6:
-    st.subheader("6. Diameter vs Health")
-    fig, ax = styled_fig()
-    sns.boxplot(data=df2, x='health', y='tree_dbh', ax=ax,
-                palette=[SAGA_GREEN, ACCENT, BROWN_LIGHT, "#e07a5f"])
-    ax.set_xlabel("Health")
-    ax.set_ylabel("Diameter (inches)")
-    st.pyplot(fig); plt.close()
-    st.caption("*Good health trees tend to have larger diameters. Poor health trees are often smaller/younger.*")
 
+    st.subheader("6. Diameter vs Health")
+
+    fig, ax = styled_fig()
+
+    sns.boxplot(
+        data=df2,
+        x='health',
+        y='tree_dbh',
+        ax=ax,
+        palette=CHART_PALETTE
+    )
+
+    st.pyplot(fig)
+
+# ---------------------------------------------------------
+# 7 + 8
+# ---------------------------------------------------------
 col7, col8 = st.columns(2)
 
 with col7:
+
     st.subheader("7. Status Breakdown")
+
     status_counts = df2['status'].value_counts()
+
     fig, ax = styled_fig()
-    sns.barplot(x=status_counts.values, y=status_counts.index, ax=ax, color=BROWN_LIGHT)
-    ax.set_xlabel("Count")
-    st.pyplot(fig); plt.close()
-    st.caption("*Alive = planted and surviving. Stump = removed tree. Dead = standing dead tree.*")
+
+    sns.barplot(
+        x=status_counts.values,
+        y=status_counts.index,
+        ax=ax,
+        palette=CHART_PALETTE
+    )
+
+    st.pyplot(fig)
 
 with col8:
-    st.subheader("8. Species Diversity by Borough")
-    diversity = df2.groupby('boroname')['spc_common'].nunique().sort_values(ascending=False)
-    fig, ax = styled_fig()
-    sns.barplot(x=diversity.values, y=diversity.index, ax=ax, color=ACCENT)
-    ax.set_xlabel("Number of Species")
-    st.pyplot(fig); plt.close()
-    st.caption("*Manhattan has highest species diversity despite fewer total trees.*")
 
+    st.subheader("8. Species Diversity by Borough")
+
+    diversity = (
+        df2.groupby('boroname')['spc_common']
+        .nunique()
+        .sort_values(ascending=False)
+    )
+
+    fig, ax = styled_fig()
+
+    sns.barplot(
+        x=diversity.values,
+        y=diversity.index,
+        ax=ax,
+        palette=CHART_PALETTE
+    )
+
+    st.pyplot(fig)
+
+# ---------------------------------------------------------
+# 9 + 10
+# ---------------------------------------------------------
 col9, col10 = st.columns(2)
 
 with col9:
-    st.subheader("9. Top 10 Species by Avg Diameter")
-    avg_dbh = df2.groupby('spc_common')['tree_dbh'].mean().nlargest(10)
+
+    st.subheader("9. Top Species by Avg Diameter")
+
+    avg_dbh = (
+        df2.groupby('spc_common')['tree_dbh']
+        .mean()
+        .nlargest(10)
+    )
+
     fig, ax = styled_fig()
-    sns.barplot(x=avg_dbh.values, y=avg_dbh.index, ax=ax, color=SAGA_GREEN)
-    ax.set_xlabel("Avg Diameter (inches)")
-    st.pyplot(fig); plt.close()
-    st.caption("*Oaks and Ginkgos grow largest. Smaller species like Crabapple have lower avg diameter.*")
+
+    sns.barplot(
+        x=avg_dbh.values,
+        y=avg_dbh.index,
+        ax=ax,
+        palette=CHART_PALETTE
+    )
+
+    st.pyplot(fig)
 
 with col10:
+
     st.subheader("10. Health % by Species")
-    top_10 = df2['spc_common'].value_counts().head(10).index
+
+    top_10 = (
+        df2['spc_common']
+        .value_counts()
+        .head(10)
+        .index
+    )
+
     health_pct = (
         df2[df2['spc_common'].isin(top_10)]
         .groupby('spc_common')['health']
@@ -388,22 +710,59 @@ with col10:
         .unstack()
         .fillna(0) * 100
     )
-    fig, ax = styled_fig()
-    health_pct.plot(kind='barh', stacked=True, ax=ax,
-                    color=[SAGA_GREEN, ACCENT, BROWN_LIGHT, "#e07a5f"])
-    ax.set_xlabel("Percentage")
-    ax.legend(title="Health", bbox_to_anchor=(1.05, 1), loc='upper left',
-              facecolor='#3a2a20', labelcolor=TEXT_MAIN)
-    st.pyplot(fig); plt.close()
-    st.caption("*Some species like Ginkgo have very high Good health %. Others like Elm have more Poor trees.*")
 
+    fig, ax = styled_fig()
+
+    health_pct.plot(
+        kind='barh',
+        stacked=True,
+        ax=ax,
+        color=CHART_PALETTE
+    )
+
+    ax.legend(
+        title="Health",
+        bbox_to_anchor=(1.05, 1),
+        loc='upper left'
+    )
+
+    st.pyplot(fig)
+
+# =========================================================
+# DATA TABLE
+# =========================================================
 st.divider()
 
-# ---------------- DATA TABLE ----------------
 st.subheader("📋 Sample of Filtered Data")
-display_cols = ['spc_common', 'boroname', 'tree_dbh', 'health', 'status']
+
+display_cols = [
+    'spc_common',
+    'boroname',
+    'tree_dbh',
+    'health',
+    'status'
+]
+
 st.dataframe(
-    df2[display_cols].sample(min(100, len(df2))).reset_index(drop=True),
+    df2[display_cols]
+    .sample(min(100, len(df2)))
+    .reset_index(drop=True),
+
     use_container_width=True,
-    height=300
+    height=350
+)
+
+# =========================================================
+# FOOTER
+# =========================================================
+st.markdown(
+    f"""
+    <hr>
+    <center>
+        <p style="color:{TEXT_DIM};">
+            NYC Tree Census Dashboard • Streamlit + Pandas + Matplotlib
+        </p>
+    </center>
+    """,
+    unsafe_allow_html=True
 )
