@@ -4,7 +4,6 @@ import numpy as np
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
 import plotly.express as px
-import io
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -48,24 +47,6 @@ h1, h2, h3 {
     padding: 20px;
     border-radius: 8px;
 }
-.stButton>button {
-    background-color: #9CAF88;
-    color: white;
-    border-radius: 6px;
-    padding: 10px 24px;
-    font-weight: 600;
-    border: none;
-}
-.stButton>button:hover {
-    background-color: #7a9370;
-    box-shadow: 0 4px 12px rgba(156, 175, 136, 0.3);
-}
-.stTextInput>div>div>input,
-.stSelectbox>div>div>select,
-.stMultiSelect>div>div>select {
-    border: 2px solid #D4A574;
-    border-radius: 6px;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -78,7 +59,7 @@ def load_data():
 
 df = load_data()
 
-# Dummy functions to replace missing filters.py and charts.py
+# Dummy functions
 def apply_filters(df):
     return df
 
@@ -106,16 +87,6 @@ def create_all_charts(df):
     return {'pie': pie, 'histogram': hist, 'line': line, 'bar': bar, 'scatter': scatter,
             'box': box, 'heatmap': heatmap, 'area': area, 'count': count, 'violin': violin}
 
-def download_chart(chart, filename):
-    img_bytes = chart.to_image(format="png", scale=2)
-    st.download_button(
-        label="📥 Download",
-        data=img_bytes,
-        file_name=f"{filename}.png",
-        mime="image/png",
-        key=f"dl_{filename}"
-    )
-
 # Header
 col1, col2 = st.columns([3, 1])
 with col1:
@@ -129,7 +100,7 @@ st.markdown("""
 ### Dashboard Overview
 This interactive dashboard presents a comprehensive analysis of the **2015 NYC Street Tree Census** data.
 Explore tree health, species distribution, geographic patterns, and maintenance records across NYC's five boroughs.
-Each visualization is **filterable in real-time** and **downloadable** for further analysis.
+Each visualization is **filterable in real-time**.
 """)
 st.markdown("---")
 
@@ -139,7 +110,7 @@ st.sidebar.markdown("**Adjust filters below to update all charts simultaneously*
 
 boroughs = sorted(df['borough'].dropna().unique())
 health_status = sorted(df['health'].dropna().unique())
-tree_species = sorted(df['spc_common'].dropna().unique())
+top_species_list = df['spc_common'].value_counts().head(10).index.tolist()
 user_types = sorted(df['user_type'].dropna().unique())
 
 st.sidebar.markdown("### 📅 Date Range")
@@ -155,7 +126,6 @@ st.sidebar.markdown("### 💚 Tree Health Status")
 selected_health = st.sidebar.multiselect("Select Health Status:", options=health_status, default=health_status)
 
 st.sidebar.markdown("### 🌱 Tree Species (Top 10)")
-top_species_list = df['spc_common'].value_counts().head(10).index.tolist()
 selected_species = st.sidebar.multiselect("Select Species:", options=top_species_list, default=top_species_list)
 
 st.sidebar.markdown("### 👤 User Type")
@@ -214,48 +184,38 @@ st.markdown("---")
 # Generate charts
 charts = create_all_charts(filtered_df)
 
-# Chart Grid
+# Chart Grid - NO DOWNLOAD BUTTONS TO AVOID KALEIDO ERROR
 st.markdown("## 📊 Interactive Visualizations")
 
 col1, col2 = st.columns(2)
 with col1:
     st.plotly_chart(charts['pie'], use_container_width=True, key="pie_chart")
-    download_chart(charts['pie'], "trees_by_borough")
 with col2:
     st.plotly_chart(charts['histogram'], use_container_width=True, key="hist_chart")
-    download_chart(charts['histogram'], "dbh_distribution")
 
 col3, col4 = st.columns(2)
 with col3:
     st.plotly_chart(charts['line'], use_container_width=True, key="line_chart")
-    download_chart(charts['line'], "cumulative_trees")
 with col4:
     st.plotly_chart(charts['bar'], use_container_width=True, key="bar_chart")
-    download_chart(charts['bar'], "top_species")
 
 col5, col6 = st.columns(2)
 with col5:
     st.plotly_chart(charts['scatter'], use_container_width=True, key="scatter_chart")
-    download_chart(charts['scatter'], "dbh_vs_health")
 with col6:
     st.plotly_chart(charts['box'], use_container_width=True, key="box_chart")
-    download_chart(charts['box'], "dbh_by_borough")
 
 col7, col8 = st.columns(2)
 with col7:
     st.plotly_chart(charts['heatmap'], use_container_width=True, key="heatmap_chart")
-    download_chart(charts['heatmap'], "correlation")
 with col8:
     st.plotly_chart(charts['area'], use_container_width=True, key="area_chart")
-    download_chart(charts['area'], "health_over_time")
 
 col9, col10 = st.columns(2)
 with col9:
     st.plotly_chart(charts['count'], use_container_width=True, key="count_chart")
-    download_chart(charts['count'], "health_count")
 with col10:
     st.plotly_chart(charts['violin'], use_container_width=True, key="violin_chart")
-    download_chart(charts['violin'], "dbh_by_health")
 
 st.markdown("---")
 st.markdown("### 📋 Raw Data Preview")
