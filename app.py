@@ -755,14 +755,296 @@ st.dataframe(
 # =========================================================
 # FOOTER
 # =========================================================
-st.markdown(
-    f"""
-    <hr>
-    <center>
-        <p style="color:{TEXT_DIM};">
-            NYC Tree Census Dashboard • Streamlit + Pandas + Matplotlib
-        </p>
-    </center>
-    """,
-    unsafe_allow_html=True
-)
+st.markdown(f"""
+<style>
+
+/* ===================================================== */
+/* GLOBAL */
+/* ===================================================== */
+html, body, [data-testid="stAppViewContainer"] {{
+    background:
+        radial-gradient(circle at top left, #2b1d16 0%, {BG_MAIN} 45%);
+    color: {TEXT_MAIN};
+    font-family: 'Inter', sans-serif;
+}}
+
+/* Main container */
+.block-container {{
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+    max-width: 1500px;
+}}
+
+/* ===================================================== */
+/* STREAMLIT TOP HEADER */
+/* ===================================================== */
+header[data-testid="stHeader"] {{
+    background: rgba(18, 11, 8, 0.88) !important;
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}}
+
+/* Toolbar buttons */
+button[kind="header"],
+[data-testid="baseButton-headerNoPadding"],
+[data-testid="stToolbar"] button {{
+    color: white !important;
+}}
+
+/* Toolbar icons */
+[data-testid="stToolbar"] svg,
+button[kind="header"] svg {{
+    fill: white !important;
+}}
+
+/* Toolbar hover */
+[data-testid="stToolbar"] button:hover {{
+    background-color: rgba(255,255,255,0.08) !important;
+    border-radius: 8px;
+}}
+
+/* ===================================================== */
+/* SIDEBAR */
+/* ===================================================== */
+[data-testid="stSidebar"] {{
+    background: linear-gradient(
+        180deg,
+        {BG_SIDEBAR} 0%,
+        #261812 100%
+    ) !important;
+
+    border-right: 2px solid {BORDER};
+}}
+
+[data-testid="stSidebar"] * {{
+    color: {TEXT_MAIN} !important;
+}}
+
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {{
+    color: {SAGA_GREEN} !important;
+    font-weight: 700;
+}}
+
+[data-testid="stSidebar"] label {{
+    color: {TEXT_MAIN} !important;
+    font-weight: 600;
+}}
+
+[data-testid="stSidebar"] .stMarkdown p {{
+    color: {TEXT_DIM} !important;
+}}
+
+/* ===================================================== */
+/* TITLE */
+/* ===================================================== */
+h1 {{
+    color: {SAGA_GREEN} !important;
+    font-size: 3rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -1px;
+
+    text-shadow:
+        0 0 8px rgba(46,196,182,0.35),
+        0 0 22px rgba(46,196,182,0.15);
+}}
+
+h2, h3 {{
+    color: {GOLD_LIGHT} !important;
+    font-weight: 700 !important;
+}}
+
+/* ===================================================== */
+/* INFO / ALERT BOX */
+/* ===================================================== */
+[data-testid="stAlert"] {{
+    background: linear-gradient(
+        135deg,
+        rgba(46,196,182,0.12),
+        rgba(255,183,3,0.08)
+    ) !important;
+
+    border: 1px solid rgba(46,196,182,0.4) !important;
+
+    border-radius: 16px;
+    backdrop-filter: blur(6px);
+
+    color: {TEXT_MAIN} !important;
+}}
+
+/* ===================================================== */
+/* METRIC CARDS */
+/* ===================================================== */
+[data-testid="metric-container"] {{
+    background:
+        linear-gradient(
+            145deg,
+            rgba(59,36,26,0.95),
+            rgba(36,23,18,0.98)
+        );
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    border-left: 5px solid {SAGA_GREEN};
+
+    border-radius: 18px;
+
+    padding: 1.2rem;
+
+    box-shadow:
+        0 8px 24px rgba(0,0,0,0.35),
+        0 0 0 1px rgba(46,196,182,0.05);
+
+    transition: 0.3s ease;
+}}
+
+[data-testid="metric-container"]:hover {{
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 12px 28px rgba(0,0,0,0.45),
+        0 0 18px rgba(46,196,182,0.18);
+}}
+
+[data-testid="metric-container"] label {{
+    color: {TEXT_DIM} !important;
+    font-size: 0.9rem !important;
+}}
+
+[data-testid="stMetricValue"] {{
+    color: {CREAM} !important;
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+}}
+
+/* ===================================================== */
+/* BUTTONS */
+/* ===================================================== */
+.stButton > button {{
+    background: linear-gradient(
+        135deg,
+        {SAGA_GREEN},
+        {SAGA_GREEN_DARK}
+    ) !important;
+
+    color: white !important;
+
+    border: none !important;
+
+    border-radius: 12px !important;
+
+    font-weight: 700 !important;
+
+    padding: 0.6rem 1rem !important;
+
+    box-shadow:
+        0 4px 14px rgba(46,196,182,0.35);
+
+    transition: all 0.25s ease;
+}}
+
+.stButton > button:hover {{
+    transform: scale(1.03);
+
+    box-shadow:
+        0 6px 18px rgba(46,196,182,0.5);
+}}
+
+/* ===================================================== */
+/* MULTISELECT TAGS */
+/* ===================================================== */
+[data-testid="stMultiSelect"] span[data-baseweb="tag"] {{
+    background: linear-gradient(
+        135deg,
+        {SAGA_GREEN_DARK},
+        {SAGA_GREEN}
+    ) !important;
+
+    color: white !important;
+
+    border-radius: 8px !important;
+
+    border: none !important;
+
+    font-weight: 600;
+}}
+
+[data-testid="stMultiSelect"] span[data-baseweb="tag"] span {{
+    color: white !important;
+}}
+
+/* ===================================================== */
+/* INPUTS */
+/* ===================================================== */
+div[data-baseweb="select"] > div {{
+    background-color: {BG_CARD} !important;
+
+    border: 1px solid {BORDER} !important;
+
+    border-radius: 10px !important;
+}}
+
+/* ===================================================== */
+/* SLIDER */
+/* ===================================================== */
+.stSlider > div > div > div > div {{
+    background: linear-gradient(
+        90deg,
+        {SAGA_GREEN},
+        {GOLD}
+    ) !important;
+}}
+
+/* ===================================================== */
+/* DATAFRAME */
+/* ===================================================== */
+[data-testid="stDataFrame"] {{
+    border-radius: 16px;
+    overflow: hidden;
+
+    border: 1px solid rgba(255,255,255,0.06);
+
+    box-shadow:
+        0 8px 22px rgba(0,0,0,0.3);
+}}
+
+/* ===================================================== */
+/* CAPTION */
+/* ===================================================== */
+.stCaption {{
+    color: {TEXT_DIM} !important;
+    font-style: italic;
+}}
+
+/* ===================================================== */
+/* CHART CONTAINERS */
+/* ===================================================== */
+.element-container:has(canvas) {{
+    background: linear-gradient(
+        145deg,
+        rgba(59,36,26,0.85),
+        rgba(36,23,18,0.95)
+    );
+
+    padding: 1rem;
+
+    border-radius: 18px;
+
+    border: 1px solid rgba(255,255,255,0.06);
+
+    box-shadow:
+        0 8px 24px rgba(0,0,0,0.35);
+
+    margin-bottom: 1rem;
+}}
+
+/* ===================================================== */
+/* DIVIDER */
+/* ===================================================== */
+hr {{
+    border-color: rgba(255,255,255,0.08);
+}}
+
+</style>
+""", unsafe_allow_html=True)
