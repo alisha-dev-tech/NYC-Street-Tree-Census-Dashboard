@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import folium
 from streamlit_folium import folium_static
 
@@ -10,14 +11,20 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
+# Custom CSS - Fixed for dark mode
 st.markdown("""
 <style>
 .main {background-color: #f8f9fa;}
 .stSidebar {background-color: #e8f5e9;}
 h1 {color: #2e7d32; font-weight: bold;}
 h2, h3 {color: #388e3c;}
-.stMetric {background-color: #ffffff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+.stMetric {
+    background-color: #ffffff; 
+    padding: 15px; 
+    border-radius: 10px; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.stMetric label, .stMetric div {color: #000 !important;}
 .stButton>button {background-color: #4caf50; color: white; border-radius: 5px;}
 .stButton>button:hover {background-color: #45a049;}
 </style>
@@ -26,11 +33,8 @@ h2, h3 {color: #388e3c;}
 @st.cache_data
 def load_data():
     df = pd.read_csv('2015_Street_Tree_Census_-_Tree_Data.csv', on_bad_lines='skip', engine='python')
-    
-    # Clean column names: replace spaces with underscores and make lowercase
     df.columns = df.columns.str.strip().str.replace(' ', '_').str.lower()
     
-    # Convert created_date to datetime if it exists, otherwise set to NaT
     if 'created_date' in df.columns:
         df['created_at'] = pd.to_datetime(df['created_date'], errors='coerce')
     else:
@@ -46,12 +50,14 @@ with st.spinner('Loading data...'):
 st.sidebar.title("Filters")
 boroughs = st.sidebar.multiselect("Select Boroughs", options=df['borough'].dropna().unique(), default=df['borough'].dropna().unique())
 health_options = st.sidebar.multiselect("Tree Health", options=df['health'].dropna().unique(), default=df['health'].dropna().unique())
+status_options = st.sidebar.multiselect("Tree Status", options=df['status'].dropna().unique(), default=df['status'].dropna().unique())
 species_list = st.sidebar.multiselect("Species", options=df['spc_common'].dropna().unique()[:20], default=df['spc_common'].dropna().unique()[:10])
 
 # Apply Filters
 filtered_df = df[
     (df['borough'].isin(boroughs)) & 
     (df['health'].isin(health_options)) & 
+    (df['status'].isin(status_options)) &
     (df['spc_common'].isin(species_list))
 ]
 
@@ -71,7 +77,7 @@ with col4:
     healthy_pct = (filtered_df['health'] == 'Good').mean() * 100 if len(filtered_df) > 0 else 0
     st.metric("Healthy Trees %", f"{healthy_pct:.1f}%")
 
-# Charts
+# Charts Row 1
 st.subheader("Top 10 Species Distribution")
 species_count = filtered_df['spc_common'].value_counts().head(10)
 if len(species_count) > 0:
@@ -112,6 +118,49 @@ with col2:
         )
         st.plotly_chart(fig_borough, use_container_width=True)
 
+# Charts Row 2
+col1, col2 = st.columns(2)
+with col1:
+    st.subheader("Tree Status")
+    status_count = filtered_df['status'].value_counts()
+    if len(status_count) > 0:
+        fig_status = px.bar(
+            x=status_count.index,
+            y=status_count.values,
+            labels={'x': 'Status', 'y': 'Tree Count'},
+            color=status_count.values,
+            color_continuous_scale='Blues'
+        )
+        st.plotly_chart(fig_status, use_container_width=True)
+
+with col2:
+    st.subheader("Diameter Distribution")
+    if 'tree_dbh' in filtered_df.columns:
+        fig_dbh = px.histogram(
+            filtered_df,
+            x='tree_dbh',
+            nbins=30,
+            labels={'tree_dbh': 'Diameter (inches)', 'count': 'Tree Count'},
+            color_discrete_sequence=['#4caf50']
+        )
+        fig_dbh.update_layout(height=350)
+        st.plotly_chart(fig_dbh, use_container_width=True)
+
+# Charts Row 3
+st.subheader("Trees by Guard Type")
+if 'guard' in filtered_df.columns:
+    guard_count = filtered_df['guard'].value_counts().head(10)
+    if len(guard_count) > 0:
+        fig_guard = px.bar(
+            x=guard_count.index,
+            y=guard_count.values,
+            labels={'x': 'Guard Type', 'y': 'Tree Count'},
+            color=guard_count.values,
+            color_continuous_scale='Oranges'
+        )
+        fig_guard.update_layout(height=350)
+        st.plotly_chart(fig_guard, use_container_width=True)
+
 # Map
 st.subheader("Tree Locations Map")
 if len(filtered_df) > 0:
@@ -132,7 +181,7 @@ else:
 
 # Data Table
 st.subheader("Sample Data")
-st.dataframe(filtered_df[['spc_common', 'borough', 'health', 'created_at']].head(100))
+st.dataframe(filtered_df[['spc_common', 'borough', 'health', 'status', 'tree_dbh', 'created_at']].head(100))
 
 st.markdown("---")
 st.markdown("**Data Source:** NYC Open Data - Street Tree Census 2015")
