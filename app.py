@@ -36,7 +36,7 @@ h1, h2, h3 {{color: {SAGA_GREEN};}}
 # ---------------- LOAD DATA ----------------
 @st.cache_data
 def load_data():
-    df = pd.read_csv("nyc_tree_census.csv", low_memory=False)
+    df = pd.read_csv("data/2015_Street_Tree_Census_-_Tree_Data.csv", low_memory=False)
     df['tree_dbh'] = pd.to_numeric(df['tree_dbh'], errors='coerce')
     df['spc_common'] = df['spc_common'].fillna('Unknown')
     df['boro_name'] = df['boro_name'].fillna('Unknown')
