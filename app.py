@@ -27,10 +27,10 @@ h2, h3 {color: #388e3c;}
 def load_data():
     df = pd.read_csv('2015_Street_Tree_Census_-_Tree_Data.csv', on_bad_lines='skip', engine='python')
     
-    # سارے کالم کے نام صاف کر دو: space کو underscore میں اور lowercase
+    # Clean column names: replace spaces with underscores and make lowercase
     df.columns = df.columns.str.strip().str.replace(' ', '_').str.lower()
     
-    # اگر created_date کالم ہے تو datetime میں کنورٹ کرو، ورنہ خالی رکھو
+    # Convert created_date to datetime if it exists, otherwise set to NaT
     if 'created_date' in df.columns:
         df['created_at'] = pd.to_datetime(df['created_date'], errors='coerce')
     else:
@@ -38,17 +38,17 @@ def load_data():
     
     return df
 
-# ڈیٹا لوڈ کرو
-with st.spinner('Data load ho raha hai...'):
+# Load data
+with st.spinner('Loading data...'):
     df = load_data()
 
 # Sidebar Filters
 st.sidebar.title("Filters")
-boroughs = st.sidebar.multiselect("Borough Select Karo", options=df['borough'].dropna().unique(), default=df['borough'].dropna().unique())
+boroughs = st.sidebar.multiselect("Select Boroughs", options=df['borough'].dropna().unique(), default=df['borough'].dropna().unique())
 health_options = st.sidebar.multiselect("Tree Health", options=df['health'].dropna().unique(), default=df['health'].dropna().unique())
 species_list = st.sidebar.multiselect("Species", options=df['spc_common'].dropna().unique()[:20], default=df['spc_common'].dropna().unique()[:10])
 
-# Filters Apply کرو
+# Apply Filters
 filtered_df = df[
     (df['borough'].isin(boroughs)) & 
     (df['health'].isin(health_options)) & 
@@ -57,7 +57,7 @@ filtered_df = df[
 
 # Title
 st.title("NYC Street Tree Census Dashboard")
-st.markdown("New York City کے street trees کا interactive analysis")
+st.markdown("Interactive analysis of New York City street trees")
 
 # Metrics
 col1, col2, col3, col4 = st.columns(4)
@@ -72,7 +72,7 @@ with col4:
     st.metric("Healthy Trees %", f"{healthy_pct:.1f}%")
 
 # Charts
-st.subheader("Species Distribution")
+st.subheader("Top 10 Species Distribution")
 species_count = filtered_df['spc_common'].value_counts().head(10)
 if len(species_count) > 0:
     fig_species = px.bar(
