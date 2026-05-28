@@ -38,7 +38,8 @@ def load_data():
         st.error("❌ CSV file not found! Make sure 'data/trees.csv' is uploaded to your GitHub repo.")
         st.stop()
     
-    
+    # Show actual columns for debugging
+    st.sidebar.write("**CSV Columns:**", list(df.columns)[:10])
     
     # اب borough, boro_name, boroname تینوں handle ہوں گے
     if 'boro_name' in df.columns:
