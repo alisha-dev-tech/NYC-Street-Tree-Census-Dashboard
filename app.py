@@ -73,7 +73,7 @@ h1, h2, h3 {
 def load_data():
     try:
         url = "https://drive.google.com/uc?export=download&id=1OkstsN_r1glXGIAbPW1LkZ2L7SnB6u6A"
-        df = pd.read_csv(url)
+        df = pd.read_csv(url, on_bad_lines='skip', engine='python', low_memory=False)
     except Exception as e:
         st.error(f"CSV load nahi ho rahi: {e}")
         st.stop()
