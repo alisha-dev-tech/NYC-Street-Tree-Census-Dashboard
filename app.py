@@ -747,73 +747,141 @@ with col2:
 
 st.markdown("---")
 
-    # ============================================================================
-    # DATA EXPORT SECTION
-    # ============================================================================
-    st.markdown("### 📥 Data Export & Download")
-    
-    export_col1, export_col2, export_col3 = st.columns(3)
+  # ============================================================================
+# DATA EXPORT SECTION
+# ============================================================================
+st.markdown("### 📥 Data Export & Download")
 
-    with export_col1:
-        csv_data = filtered_df.to_csv(index=False)
-        st.download_button(
-            label="📥 Download Filtered Data (CSV)",
-            data=csv_data,
-            file_name=f"tree_census_filtered_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-            mime="text/csv",
-            use_container_width=True
+export_col1, export_col2, export_col3 = st.columns(3)
+
+# ----------------------------------------------------------------
+# COLUMN 1 - FILTERED CSV DOWNLOAD
+# ----------------------------------------------------------------
+with export_col1:
+    csv_data = filtered_df.to_csv(index=False)
+
+    st.download_button(
+        label="📥 Download Filtered Data (CSV)",
+        data=csv_data,
+        file_name=f"tree_census_filtered_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+        mime="text/csv",
+        use_container_width=True
+    )
+
+# ----------------------------------------------------------------
+# COLUMN 2 - SUMMARY DOWNLOAD
+# ----------------------------------------------------------------
+with export_col2:
+
+    summary_stats = {
+        'Total Trees': len(filtered_df),
+
+        'Average Diameter (inches)': round(
+            filtered_df['tree_dbh'].mean(), 2
+        ),
+
+        'Median Diameter (inches)': round(
+            filtered_df['tree_dbh'].median(), 2
+        ),
+
+        'Healthy % (Good Status)': round(
+            (
+                len(filtered_df[filtered_df['health'] == 'Good'])
+                / len(filtered_df) * 100
+            ),
+            2
+        ) if len(filtered_df) > 0 else 0,
+
+        'Alive % (Status)': round(
+            (
+                len(filtered_df[filtered_df['status'] == 'Alive'])
+                / len(filtered_df) * 100
+            ),
+            2
+        ) if len(filtered_df) > 0 else 0,
+
+        'Species Count': filtered_df['spc_common'].nunique(),
+    }
+
+    summary_df = pd.DataFrame(
+        list(summary_stats.items()),
+        columns=['Metric', 'Value']
+    )
+
+    csv_summary = summary_df.to_csv(index=False)
+
+    st.download_button(
+        label="📊 Download Summary Statistics",
+        data=csv_summary,
+        file_name=f"tree_census_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+        mime="text/csv",
+        use_container_width=True
+    )
+
+# ----------------------------------------------------------------
+# COLUMN 3 - QUICK SUMMARY
+# ----------------------------------------------------------------
+with export_col3:
+
+    summary_stats_display = {
+        'Total Records': f"{len(filtered_df):,}",
+        'Avg DBH': f"{filtered_df['tree_dbh'].mean():.2f}\"",
+        'Species Variety': f"{filtered_df['spc_common'].nunique()}",
+        'Healthy Trees': f"{healthy_pct:.1f}%"
+    }
+
+    st.info(
+        "**📊 Quick Summary:**\n\n"
+        + "\n".join(
+            [f"• {k}: {v}" for k, v in summary_stats_display.items()]
         )
+    )
 
-    with export_col2:
-        summary_stats = {
-            'Total Trees': len(filtered_df),
-            'Average Diameter (inches)': round(filtered_df['tree_dbh'].mean(), 2),
-            'Median Diameter (inches)': round(filtered_df['tree_dbh'].median(), 2),
-            'Healthy % (Good Status)': round((len(filtered_df[filtered_df['health'] == 'Good']) / len(filtered_df) * 100), 2) if len(filtered_df) > 0 else 0,
-            'Alive % (Status)': round((len(filtered_df[filtered_df['status'] == 'Alive']) / len(filtered_df) * 100), 2) if len(filtered_df) > 0 else 0,
-            'Species Count': filtered_df['spc_common'].nunique(),
-        }
-        summary_df = pd.DataFrame(list(summary_stats.items()), columns=['Metric', 'Value'])
-        csv_summary = summary_df.to_csv(index=False)
-        st.download_button(
-            label="📊 Download Summary Statistics",
-            data=csv_summary,
-            file_name=f"tree_census_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-            mime="text/csv",
-            use_container_width=True
-        )
+st.markdown("---")
 
-    with export_col3:
-        # Display summary statistics as a table
-        summary_stats_display = {
-            'Total Records': f"{len(filtered_df):,}",
-            'Avg DBH': f"{filtered_df['tree_dbh'].mean():.2f}\"",
-            'Species Variety': f"{filtered_df['spc_common'].nunique()}",
-            'Healthy Trees': f"{healthy_pct:.1f}%",
-        }
-        
-        st.info("**📊 Quick Summary:**\n\n" + 
-                "\n".join([f"• {k}: {v}" for k, v in summary_stats_display.items()]))
+# ============================================================================
+# FOOTER INFORMATION
+# ============================================================================
+st.markdown(
+    """
+    <div style='background-color: #F0E6D6;
+                padding: 20px;
+                border-radius: 10px;
+                border-left: 5px solid #9CAF88;
+                margin-top: 30px;'>
 
-    st.markdown("---")
+        <h4 style='color: #6B5344; margin-top: 0;'>
+            📋 Dashboard Information
+        </h4>
 
-    # ============================================================================
-    # FOOTER INFORMATION
-    # ============================================================================
-    st.markdown("""
-    <div style='background-color: #F0E6D6; padding: 20px; border-radius: 10px; border-left: 5px solid #9CAF88; margin-top: 30px;'>
-    <h4 style='color: #6B5344; margin-top: 0;'>📋 Dashboard Information</h4>
-    <div style='color: #6B5344; font-size: 14px;'>
-    <b>Dataset:</b> 2015 NYC Street Tree Census<br>
-    <b>Total Records Available:</b> {:,} trees<br>
-    <b>Current Filtered Records:</b> {:,} trees<br>
-    <b>Analysis Date:</b> {}<br>
-    <b>Chart Types:</b> 10 (Pie, Histogram, Line, Bar, Scatter, Box, Heatmap, Area, Count, Violin)<br>
-    <b>Interactive Filters:</b> Date Range, Borough, Health Status, Species, User Type, DBH Range, Address Search<br>
-    <b>Theme:</b> Light Brown & Sage Green (Professional Color Scheme)<br>
+        <div style='color: #6B5344; font-size: 14px;'>
+
+        <b>Dataset:</b> 2015 NYC Street Tree Census<br>
+
+        <b>Total Records Available:</b> {:,} trees<br>
+
+        <b>Current Filtered Records:</b> {:,} trees<br>
+
+        <b>Analysis Date:</b> {}<br>
+
+        <b>Chart Types:</b>
+        10 (Pie, Histogram, Line, Bar, Scatter, Box,
+        Heatmap, Area, Count, Violin)<br>
+
+        <b>Interactive Filters:</b>
+        Date Range, Borough, Health Status, Species,
+        User Type, DBH Range, Address Search<br>
+
+        <b>Theme:</b>
+        Light Brown & Sage Green
+        (Professional Color Scheme)<br>
+
+        </div>
     </div>
-    </div>
-    """.format(len(df), len(filtered_df), datetime.now().strftime('%B %d, %Y at %H:%M')), unsafe_allow_html=True)
-
-else:
-    st.error("⚠️ Unable to load the dataset. Please ensure the CSV file is in the 'data' folder with the correct filename.")
+    """.format(
+        len(df),
+        len(filtered_df),
+        datetime.now().strftime('%B %d, %Y at %H:%M')
+    ),
+    unsafe_allow_html=True
+)
