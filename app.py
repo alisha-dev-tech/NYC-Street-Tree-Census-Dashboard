@@ -627,84 +627,125 @@ if data_loaded and df is not None:
         return fig
 
     # ============================================================================
-    # DISPLAY ALL CHARTS
-    # ============================================================================
-    st.markdown("### 📈 Data Visualizations")
-    st.markdown("**Click on chart legend items to toggle visibility. Hover for detailed information.**")
-    st.markdown("")
+# DISPLAY ALL CHARTS
+# ============================================================================
+# ============================================================================
+# CHART DESCRIPTIONS
+# ============================================================================
+chart_descriptions = {
+    'pie': '📊 Pie Chart: Shows the proportional distribution of trees across different boroughs.',
+    
+    'histogram': '📏 Histogram: Displays the frequency distribution of tree diameter (DBH).',
+    
+    'line': '📈 Line Chart: Illustrates cumulative growth of trees over time.',
+    
+    'bar': '🌲 Bar Chart: Compares tree counts across the top 10 most common tree species.',
+    
+    'scatter': '🔵 Scatter Plot: Shows the relationship between tree diameter and health status.',
+    
+    'box': '📦 Box Plot: Displays tree diameter distribution by borough.',
+    
+    'heatmap': '🔥 Heatmap: Visualizes correlations between numerical features.',
+    
+    'area': '📚 Area Chart: Shows tree health status trends over time.',
+    
+    'count': '📊 Count Plot: Displays frequency of tree health categories.',
+    
+    'violin': '🎻 Violin Plot: Shows density distribution of tree diameter by health status.'
+}
+st.markdown("### 📈 Data Visualizations")
+st.markdown("**Click on chart legend items to toggle visibility. Hover for detailed information.**")
+st.markdown("")
 
-    # Chart Descriptions
-    chart_descriptions = {
-        'pie': '**📊 Pie Chart**: Shows the proportional distribution of trees across different boroughs. Helps identify which borough has the most street trees.',
-        'histogram': '**📏 Histogram**: Displays the frequency distribution of tree diameter (DBH). Shows how tree sizes are distributed - reveals whether we have mostly small, medium, or large trees.',
-        'line': '**📈 Line Chart**: Illustrates cumulative growth of trees over time during the survey period. Shows the overall trend and progression of tree census data collection.',
-        'bar': '**🌲 Bar Chart**: Compares tree counts across the top 10 most common tree species. Identifies which species are most prevalent on NYC streets.',
-        'scatter': '**🔵 Scatter Plot**: Visualizes the relationship between tree diameter and health status. Reveals patterns - does tree size correlate with health conditions?',
-        'box': '**📦 Box Plot**: Shows the distribution of tree diameter by borough. Displays median, quartiles, and outliers - which borough has the largest/smallest trees?',
-        'heatmap': '**🔥 Heatmap**: Visualizes correlations between numerical features. Shows which tree characteristics are strongly related to each other.',
-        'area': '**📚 Area Chart**: Shows cumulative trends in tree health status over time. Demonstrates how the distribution of healthy/fair/poor trees evolved during the survey.',
-        'count': '**📊 Count Plot**: Displays frequency counts of tree health conditions. Shows how many trees fall into each health category (Good, Fair, Poor).',
-        'violin': '**🎻 Violin Plot**: Shows the probability density distribution of tree diameter by health status. Reveals detailed size patterns within each health category.'
-    }
+# ROW 1: Pie Chart, Histogram, Line Chart
+col1, col2, col3 = st.columns(3)
 
-    # ROW 1: Pie Chart, Histogram, Line Chart
-    col1, col2, col3 = st.columns(3)
+with col1:
+    st.plotly_chart(create_pie_chart(filtered_df), use_container_width=True, height=500)
+    st.markdown(
+        '<div class="chart-description">' + chart_descriptions['pie'] + '</div>',
+        unsafe_allow_html=True
+    )
 
-    with col1:
-        st.markdown('<div class="chart-description">' + chart_descriptions['pie'] + '</div>', unsafe_allow_html=True)
-        st.plotly_chart(create_pie_chart(filtered_df), use_container_width=True, height=500)
+with col2:
+    st.plotly_chart(create_histogram(filtered_df), use_container_width=True, height=500)
+    st.markdown(
+        '<div class="chart-description">' + chart_descriptions['histogram'] + '</div>',
+        unsafe_allow_html=True
+    )
 
-    with col2:
-        st.markdown('<div class="chart-description">' + chart_descriptions['histogram'] + '</div>', unsafe_allow_html=True)
-        st.plotly_chart(create_histogram(filtered_df), use_container_width=True, height=500)
+with col3:
+    st.plotly_chart(create_line_chart(filtered_df), use_container_width=True, height=500)
+    st.markdown(
+        '<div class="chart-description">' + chart_descriptions['line'] + '</div>',
+        unsafe_allow_html=True
+    )
 
-    with col3:
-        st.markdown('<div class="chart-description">' + chart_descriptions['line'] + '</div>', unsafe_allow_html=True)
-        st.plotly_chart(create_line_chart(filtered_df), use_container_width=True, height=500)
+st.markdown("")
 
-    st.markdown("")
+# ROW 2: Bar Chart, Scatter Plot, Box Plot
+col1, col2, col3 = st.columns(3)
 
-    # ROW 2: Bar Chart, Scatter Plot, Box Plot
-    col1, col2, col3 = st.columns(3)
+with col1:
+    st.plotly_chart(create_bar_chart(filtered_df), use_container_width=True, height=500)
+    st.markdown(
+        '<div class="chart-description">' + chart_descriptions['bar'] + '</div>',
+        unsafe_allow_html=True
+    )
 
-    with col1:
-        st.markdown('<div class="chart-description">' + chart_descriptions['bar'] + '</div>', unsafe_allow_html=True)
-        st.plotly_chart(create_bar_chart(filtered_df), use_container_width=True, height=500)
+with col2:
+    st.plotly_chart(create_scatter_plot(filtered_df), use_container_width=True, height=500)
+    st.markdown(
+        '<div class="chart-description">' + chart_descriptions['scatter'] + '</div>',
+        unsafe_allow_html=True
+    )
 
-    with col2:
-        st.markdown('<div class="chart-description">' + chart_descriptions['scatter'] + '</div>', unsafe_allow_html=True)
-        st.plotly_chart(create_scatter_plot(filtered_df), use_container_width=True, height=500)
+with col3:
+    st.plotly_chart(create_box_plot(filtered_df), use_container_width=True, height=500)
+    st.markdown(
+        '<div class="chart-description">' + chart_descriptions['box'] + '</div>',
+        unsafe_allow_html=True
+    )
 
-    with col3:
-        st.markdown('<div class="chart-description">' + chart_descriptions['box'] + '</div>', unsafe_allow_html=True)
-        st.plotly_chart(create_box_plot(filtered_df), use_container_width=True, height=500)
+st.markdown("")
 
-    st.markdown("")
+# ROW 3: Heatmap, Area Chart, Count Plot
+col1, col2, col3 = st.columns(3)
 
-    # ROW 3: Heatmap, Area Chart, Count Plot
-    col1, col2, col3 = st.columns(3)
+with col1:
+    st.plotly_chart(create_heatmap(filtered_df), use_container_width=True, height=500)
+    st.markdown(
+        '<div class="chart-description">' + chart_descriptions['heatmap'] + '</div>',
+        unsafe_allow_html=True
+    )
 
-    with col1:
-        st.markdown('<div class="chart-description">' + chart_descriptions['heatmap'] + '</div>', unsafe_allow_html=True)
-        st.plotly_chart(create_heatmap(filtered_df), use_container_width=True, height=500)
+with col2:
+    st.plotly_chart(create_area_chart(filtered_df), use_container_width=True, height=500)
+    st.markdown(
+        '<div class="chart-description">' + chart_descriptions['area'] + '</div>',
+        unsafe_allow_html=True
+    )
 
-    with col2:
-        st.markdown('<div class="chart-description">' + chart_descriptions['area'] + '</div>', unsafe_allow_html=True)
-        st.plotly_chart(create_area_chart(filtered_df), use_container_width=True, height=500)
+with col3:
+    st.plotly_chart(create_count_plot(filtered_df), use_container_width=True, height=500)
+    st.markdown(
+        '<div class="chart-description">' + chart_descriptions['count'] + '</div>',
+        unsafe_allow_html=True
+    )
 
-    with col3:
-        st.markdown('<div class="chart-description">' + chart_descriptions['count'] + '</div>', unsafe_allow_html=True)
-        st.plotly_chart(create_count_plot(filtered_df), use_container_width=True, height=500)
+st.markdown("")
 
-    st.markdown("")
+# ROW 4: Violin Plot (Centered)
+col1, col2, col3 = st.columns([1, 1, 1])
 
-    # ROW 4: Violin Plot (Centered)
-    col1, col2, col3 = st.columns([1, 1, 1])
-    with col2:
-        st.markdown('<div class="chart-description">' + chart_descriptions['violin'] + '</div>', unsafe_allow_html=True)
-        st.plotly_chart(create_violin_plot(filtered_df), use_container_width=True, height=500)
+with col2:
+    st.plotly_chart(create_violin_plot(filtered_df), use_container_width=True, height=500)
+    st.markdown(
+        '<div class="chart-description">' + chart_descriptions['violin'] + '</div>',
+        unsafe_allow_html=True
+    )
 
-    st.markdown("---")
+st.markdown("---")
 
     # ============================================================================
     # DATA EXPORT SECTION
