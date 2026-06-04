@@ -161,8 +161,8 @@ st.markdown("""
 
 @st.cache_data
 def load_data():
-    url = "https://data.cityofnewyork.us/api/views/uvpi-gqnh/rows.csv?accessType=DOWNLOAD&rows=50000"
-    df = pd.read_csv(url, parse_dates=['created_at'])
+    url = "https://data.cityofnewyork.us/api/views/uvpi-gqnh/rows.csv?accessType=DOWNLOAD"
+    df = pd.read_csv(url, nrows=5000, parse_dates=['created_at'])
     return df
 
 try:
