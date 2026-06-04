@@ -158,11 +158,14 @@ st.markdown("""
 # =============================================================================
 # LOAD DATA
 # =============================================================================
+
 @st.cache_data
 def load_data():
-    df = pd.read_csv("data/trees.csv")
-    df['created_at'] = pd.to_datetime(df['created_at'], format='%m/%d/%Y', errors='coerce')
+    url = "https://data.cityofnewyork.us/api/views/uvpi-gqnh/rows.csv?accessType=DOWNLOAD"
+    df = pd.read_csv(url)
     return df
+
+df = load_data()
 
 try:
     df = load_data()
