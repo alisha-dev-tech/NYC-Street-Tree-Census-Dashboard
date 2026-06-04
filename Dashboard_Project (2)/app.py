@@ -159,14 +159,11 @@ st.markdown("""
 # LOAD DATA
 # =============================================================================
 
-
 @st.cache_data
 def load_data():
     url = "https://data.cityofnewyork.us/api/views/uvpi-gqnh/rows.csv?accessType=DOWNLOAD"
-    df = pd.read_csv(url)
+    df = pd.read_csv(url, parse_dates=['created_at'])
     return df
-
-
 
 try:
     df = load_data()
@@ -182,7 +179,7 @@ except Exception as e:
 if data_loaded and df is not None:
 
     # -------------------------------------------------------------------------
-    # COMPUTE DEFAULT VALUES (these never change)
+    # COMPUTE DEFAULT VALUES
     # -------------------------------------------------------------------------
     date_min      = df['created_at'].min().date()
     date_max      = df['created_at'].max().date()
@@ -195,7 +192,7 @@ if data_loaded and df is not None:
     default_dbh   = (dbh_min_val, int(df['tree_dbh'].quantile(0.95)))
 
     # -------------------------------------------------------------------------
-    # SESSION STATE — use "ss_" prefix to avoid widget key conflicts
+    # SESSION STATE
     # -------------------------------------------------------------------------
     def init_state():
         st.session_state.ss_start_date = date_min
@@ -236,147 +233,129 @@ if data_loaded and df is not None:
     st.markdown("---")
 
     # -------------------------------------------------------------------------
-# SIDEBAR FILTERS
-# -------------------------------------------------------------------------
-st.sidebar.markdown(
-    '<div class="sidebar-title">🔍 FILTER CONTROLS</div>', unsafe_allow_html=True)
-st.sidebar.markdown("**Adjust filters and press Apply to update charts**")
+    # SIDEBAR FILTERS
+    # -------------------------------------------------------------------------
+    st.sidebar.markdown(
+        '<div class="sidebar-title">🔍 FILTER CONTROLS</div>', unsafe_allow_html=True)
+    st.sidebar.markdown("**Adjust filters and press Apply to update charts**")
 
-# -- Date Range --
-st.sidebar.markdown(
-    '<div class="sidebar-title">📅 Date Range</div>', unsafe_allow_html=True)
+    # -- Date Range --
+    st.sidebar.markdown(
+        '<div class="sidebar-title">📅 Date Range</div>', unsafe_allow_html=True)
 
-col_d1, col_d2 = st.sidebar.columns(2)
-with col_d1:
-    start_date = st.date_input(
-        "From:",
-        value=st.session_state.ss_start_date,
-        min_value=date_min,
-        max_value=date_max,
-        key="w_start_date"
+    col_d1, col_d2 = st.sidebar.columns(2)
+    with col_d1:
+        start_date = st.date_input(
+            "From:",
+            value=st.session_state.ss_start_date,
+            min_value=date_min,
+            max_value=date_max,
+            key="w_start_date"
+        )
+    with col_d2:
+        end_date = st.date_input(
+            "To:",
+            value=st.session_state.ss_end_date,
+            min_value=date_min,
+            max_value=date_max,
+            key="w_end_date"
+        )
+
+    # -- Borough --
+    st.sidebar.markdown(
+        '<div class="sidebar-title">🏘️ Borough</div>', unsafe_allow_html=True)
+    selected_boroughs = st.sidebar.multiselect(
+        "Select Boroughs:",
+        options=boroughs,
+        default=st.session_state.ss_boroughs,
+        key="w_boroughs"
     )
-with col_d2:
-    end_date = st.date_input(
-        "To:",
-        value=st.session_state.ss_end_date,
-        min_value=date_min,
-        max_value=date_max,
-        key="w_end_date"
+
+    # -- Health Status --
+    st.sidebar.markdown(
+        '<div class="sidebar-title">💚 Tree Health Status</div>', unsafe_allow_html=True)
+    selected_health = st.sidebar.multiselect(
+        "Select Health Status:",
+        options=health_status,
+        default=st.session_state.ss_health,
+        key="w_health"
     )
 
-# -- Borough --
-st.sidebar.markdown(
-    '<div class="sidebar-title">🏘️ Borough</div>', unsafe_allow_html=True)
-selected_boroughs = st.sidebar.multiselect(
-    "Select Boroughs:",
-    options=boroughs,
-    default=st.session_state.ss_boroughs,
-    key="w_boroughs"
-)
+    # -- Species --
+    st.sidebar.markdown(
+        '<div class="sidebar-title">🌱 Species (Top 10)</div>', unsafe_allow_html=True)
+    selected_species = st.sidebar.multiselect(
+        "Select Species:",
+        options=top_species,
+        default=st.session_state.ss_species,
+        key="w_species"
+    )
 
-# -- Health Status --
-st.sidebar.markdown(
-    '<div class="sidebar-title">💚 Tree Health Status</div>', unsafe_allow_html=True)
-selected_health = st.sidebar.multiselect(
-    "Select Health Status:",
-    options=health_status,
-    default=st.session_state.ss_health,
-    key="w_health"
-)
+    # -- User Type --
+    st.sidebar.markdown(
+        '<div class="sidebar-title">👤 User Type</div>', unsafe_allow_html=True)
+    selected_user_type = st.sidebar.multiselect(
+        "Select User Type:",
+        options=user_types,
+        default=st.session_state.ss_user_type,
+        key="w_user_type"
+    )
 
-# -- Species --
-st.sidebar.markdown(
-    '<div class="sidebar-title">🌱 Species (Top 10)</div>', unsafe_allow_html=True)
-selected_species = st.sidebar.multiselect(
-    "Select Species:",
-    options=top_species,
-    default=st.session_state.ss_species,
-    key="w_species"
-)
+    # -- DBH Slider --
+    st.sidebar.markdown(
+        '<div class="sidebar-title">📏 Tree Diameter (DBH)</div>', unsafe_allow_html=True)
+    dbh_range = st.sidebar.slider(
+        "Diameter at Breast Height (inches):",
+        min_value=dbh_min_val,
+        max_value=dbh_max_val,
+        value=st.session_state.ss_dbh_range,
+        key="w_dbh_range"
+    )
 
-# -- User Type --
-st.sidebar.markdown(
-    '<div class="sidebar-title">👤 User Type</div>', unsafe_allow_html=True)
-selected_user_type = st.sidebar.multiselect(
-    "Select User Type:",
-    options=user_types,
-    default=st.session_state.ss_user_type,
-    key="w_user_type"
-)
-
-# -- DBH Slider --
-st.sidebar.markdown(
-    '<div class="sidebar-title">📏 Tree Diameter (DBH)</div>', unsafe_allow_html=True)
-dbh_range = st.sidebar.slider(
-    "Diameter at Breast Height (inches):",
-    min_value=dbh_min_val,
-    max_value=dbh_max_val,
-    value=st.session_state.ss_dbh_range,
-    key="w_dbh_range"
-)
-
-# -- Address Search --
-st.sidebar.markdown(
-    '<div class="sidebar-title">🔎 Search Address</div>', unsafe_allow_html=True)
-search_keyword = st.sidebar.text_input(
-    "Search by address:",
-    placeholder="e.g. BROADWAY",
-    value=st.session_state.ss_search,
-    key="w_search"
-)
-
-# -------------------------------------------------------------------------
-# APPLY / RESET BUTTONS
-# -------------------------------------------------------------------------
-apply_btn = st.sidebar.button("✅ Apply Filters", use_container_width=True, key="apply_btn")
-reset_btn = st.sidebar.button("🔄 Reset Filters", use_container_width=True, key="reset_btn")
-
-if apply_btn:
-    filters_dict = {
-        'date_range': (start_date, end_date),
-        'boroughs': selected_boroughs,
-        'health_status': selected_health,
-        'species': selected_species,
-        'user_types': selected_user_type,
-        'dbh_range': dbh_range,
-        'address_keyword': search_keyword
-    }
-    filtered_df = apply_filters(df, filters_dict)
-else:
-    filtered_df = df.copy()  # show full dataset until Apply is pressed
-
-if reset_btn:
-    init_state()
-    st.rerun()
-
+    # -- Address Search --
+    st.sidebar.markdown(
+        '<div class="sidebar-title">🔎 Search Address</div>', unsafe_allow_html=True)
+    search_keyword = st.sidebar.text_input(
+        "Search by address:",
+        placeholder="e.g. BROADWAY",
+        value=st.session_state.ss_search,
+        key="w_search"
+    )
 
     # -------------------------------------------------------------------------
-    # APPLY FILTERS  (use widget output variables directly)
+    # APPLY / RESET BUTTONS
     # -------------------------------------------------------------------------
-    #cooment out this if there is any error
-    #filtered_df = df.copy()
+    apply_btn = st.sidebar.button("✅ Apply Filters", use_container_width=True, key="apply_btn")
+    reset_btn = st.sidebar.button("🔄 Reset Filters", use_container_width=True, key="reset_btn")
 
-    #filtered_df = filtered_df[
-      #  (filtered_df['created_at'].dt.date >= start_date) &
-       # (filtered_df['created_at'].dt.date <= end_date)
-    #]
-    #if selected_boroughs:
-        #filtered_df = filtered_df[filtered_df['borough'].isin(selected_boroughs)]
-    #if selected_health:
-        #filtered_df = filtered_df[filtered_df['health'].isin(selected_health)]
-    #if selected_species:
-     #   filtered_df = filtered_df[filtered_df['spc_common'].isin(selected_species)]
-    #if selected_user_type:
-     #   filtered_df = filtered_df[filtered_df['user_type'].isin(selected_user_type)]
+    if reset_btn:
+        init_state()
+        st.rerun()
 
-    #filtered_df = filtered_df[
-     #   (filtered_df['tree_dbh'] >= dbh_range[0]) &
-      #  (filtered_df['tree_dbh'] <= dbh_range[1])
-    #]
-    #if search_keyword:
-     #   filtered_df = filtered_df[
-      #      filtered_df['address'].str.contains(search_keyword.upper(), na=False)
-       # ]
+    if apply_btn:
+        filtered_df = df.copy()
+        filtered_df = filtered_df[
+            (filtered_df['created_at'].dt.date >= start_date) &
+            (filtered_df['created_at'].dt.date <= end_date)
+        ]
+        if selected_boroughs:
+            filtered_df = filtered_df[filtered_df['borough'].isin(selected_boroughs)]
+        if selected_health:
+            filtered_df = filtered_df[filtered_df['health'].isin(selected_health)]
+        if selected_species:
+            filtered_df = filtered_df[filtered_df['spc_common'].isin(selected_species)]
+        if selected_user_type:
+            filtered_df = filtered_df[filtered_df['user_type'].isin(selected_user_type)]
+        filtered_df = filtered_df[
+            (filtered_df['tree_dbh'] >= dbh_range[0]) &
+            (filtered_df['tree_dbh'] <= dbh_range[1])
+        ]
+        if search_keyword:
+            filtered_df = filtered_df[
+                filtered_df['address'].str.contains(search_keyword.upper(), na=False)
+            ]
+    else:
+        filtered_df = df.copy()
 
     # -------------------------------------------------------------------------
     # EMPTY DATA CHECK
